@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+.more_song_details{
+    max-width: fit-content;
+}
+.details-count{
+    justify-content: space-between;
+    max-width: 90%;
+    margin: auto;
+}
