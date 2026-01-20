@@ -13,6 +13,7 @@ interface Song {
   audio_file?: string;
   external_link?: string;
   view_count: number;
+  category: string;
 }
 
 export default function Songs() {
@@ -20,7 +21,7 @@ export default function Songs() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(2); // total pages from API
-  const [limit] = useState(2); // items per page
+  const [limit] = useState(6); // items per page
   const [filter, setFilter] = useState('all');
   const [likes, setLikes] = useState<Record<string, number>>({});
   const [comments, setComments] = useState<Record<string, number>>({});
@@ -182,9 +183,12 @@ useEffect(()=>{
             className=" text-red-950 focus:outline-none ">
             {/* <option>{filter}</option> */}
             <option value="ALL">All</option>
-            <option value="IGISABISHO">IGISABISHO</option>
-            <option value="TUBABARIRE">TUBABARIRE</option>
-            <option value="GUHAZWA">Guhazwa</option>
+            {songs.map((song) => (
+              <option key={song.id} value={song.category}>
+                {song.category}
+              </option>
+            ))}
+
           </select>
 
           <button onClick={() => {
