@@ -33,6 +33,25 @@ export default function SongView() {
     fetchSong();
   }, [id]);
 
+  const viewSong = () =>{
+    console.log("view song");
+    try {
+      api.post('/song-interactions',{
+        action:"view",
+        song_id:id,
+        user_id:localStorage.getItem("user_id")
+      }).then((res) => {
+        console.log(res.data);
+      }).catch((err) => {
+        console.log(err);
+      })
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  }
+
   const fetchSong = async () => {
     setLoading(true);
     try {
@@ -164,6 +183,7 @@ export default function SongView() {
 
           {/* CONTENT */}
           <div className="bg-white rounded-lg overflow-hidden border">
+            {viewSong()}
             {/* VIDEO */}
             {activeTab === "video" && (
               <>

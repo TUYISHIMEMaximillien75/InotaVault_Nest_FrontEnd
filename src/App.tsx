@@ -5,7 +5,8 @@ import Songs from "./pages/Song";
 import UploadSong from "./pages/SongUpload";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SongViewer from "./pages/SongViewer";
-
+import Login from "./pages/Login";
+import SongList from "./authorizedPages/Home";
 export default function App() {
   return (
     <BrowserRouter>
@@ -13,7 +14,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/songs" element={<Songs />} />
         {/* <Route path="/songs/:id" element={<SongDetail />} /> */}
-        <Route path="/songs/:id" element={<SongViewer />} />
+          <Route path="/songs/:id" element={<SongViewer />} />
         <Route
           path="/upload"
           element={
@@ -22,6 +23,12 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/login" element={<Login/>}></Route>
+
+          {/* Authorized routes */}
+
+          <Route path="/song_list" element={<SongList/>}></Route>
+
       </Routes>
     </BrowserRouter>
   );
