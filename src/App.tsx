@@ -28,6 +28,7 @@ export default function App() {
           {/* Authorized routes */}
 
           <Route path="/song_list" element={<SongList/>}></Route>
+        <Route path="/upload" element={<UploadSong/>}></Route>
 
       </Routes>
     </BrowserRouter>

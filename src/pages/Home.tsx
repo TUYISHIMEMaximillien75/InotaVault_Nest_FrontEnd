@@ -24,7 +24,7 @@ export default function Home() {
           </Link>
 
           <Link
-            to="/login"
+            to="/upload"
             className="px-8 py-3 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 transition"
           >
             Upload Your Music

@@ -14,6 +14,8 @@ const NavBar = () => {
       console.error("Failed to fetch categories", error);
     }
   };
+
+  const thefilter = localStorage.getItem("filter");
   
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newFilter = e.target.value;
@@ -35,7 +37,7 @@ const NavBar = () => {
       </Link>
 
       {/* Filter */}
-      <div className="flex gap-2 items-center bg-gray-50 border border-red-950/25 rounded-lg px-4 py-2 shadow-md">
+      <div className="flex gap-2 items-center bg-gray-50 border border-red-950/25 rounded-lg px-4 py-2 shadow-xl max-w-[300px]">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-5 w-5 text-red-950"
@@ -59,6 +61,7 @@ const NavBar = () => {
            }}
           className="text-red-950 focus:outline-none bg-transparent"
         >
+            <option key={thefilter} value={thefilter || "all"}>{thefilter}</option>
           {categories.map((cat) => (
             <option key={cat} value={cat}>
               {cat}
@@ -68,13 +71,37 @@ const NavBar = () => {
 
         <button
           onClick={() => {
-                // window.location.reload();
+                window.location.reload();
           }}
           className="bg-red-600/75 py-2 px-4 rounded-sm text-white"
         >
           Find
         </button>
       </div>
+      {/* search icon */}
+
+          <div className="search_icon bg-gray-50 border border-red-950/25 rounded-lg px-4 py-2 shadow-md hover:shadow-2xl transition-all duration-300"
+          onClick={() => {
+            localStorage.setItem("search_bar", "on")
+            window.location.reload()
+          }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-red-950"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+          
     </div>
   );
 };

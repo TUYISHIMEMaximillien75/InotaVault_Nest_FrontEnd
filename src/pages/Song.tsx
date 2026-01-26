@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/api.ts";
-import logo from "../assets/logo.png";
+// import logo from "../assets/logo.png";
 import icon from "../assets/icon.png"
-import { Link } from "react-router-dom";
-
+// import { Link } from "react-router-dom";
+import NavBar from "../authorizedPages/NavBar.tsx";
+import Search_bar from "./Search_bar.tsx";
 interface Song {
   id: string;
   name: string;
@@ -22,16 +23,18 @@ export default function Songs() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(2); // total pages from API
   const [limit] = useState(6); // items per page
-  const [filter, setFilter] = useState('all');
+  // const [filter, setFilter] = useState('all');
   const [likes, setLikes] = useState<Record<string, number>>({});
   const [comments, setComments] = useState<Record<string, number>>({});
 
   const navigate = useNavigate();
 
-  const fetchSongs = async (pageNumber: number, filter: string) => {
+  const fetchSongs = async (pageNumber: number) => {
+    const filter = localStorage.getItem("filter");
+
     setLoading(true);
     try {
-      const newfilter = await filter;
+      const newfilter = filter;
       const res = await api.get(`/songs/allsong?category=${newfilter}&page=${pageNumber}&limit=${limit}`);
       setSongs(res.data.paginatedSong);
 
@@ -91,7 +94,7 @@ export default function Songs() {
   };
 
   useEffect(() => {
-    fetchSongs(page, filter);
+    fetchSongs(page);
   }, [page]);
 
   useEffect(() => {
@@ -156,48 +159,9 @@ useEffect(()=>{
 
   return (
     <>
-      <div className="fixed top-4 left-4 z-50 flex items-center gap-4">
-        {/* Logo */}
-        <Link to="/" className="flex items-center bg-gray-50 shadow-xl rounded-lg px-4 py-2 hover:shadow-2xl transition-all duration-300">
-          <img src={logo} alt="Logo" className="h-12 w-auto mr-2" />
-          <span className="text-xl font-bold text-gray-800"></span>
-        </Link>
+      <NavBar />
 
-        {/* Filter Button */}
-        <div className="flex gap-2 items-center bg-gray-50 border border-red-950/25 text-white font-semibold rounded-lg px-4 py-2 transition-colors duration-300 shadow-md hover:shadow-lg">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 mr-2 text-red-950"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-6.414 6.414A1 1 0 0114 13v5a1 1 0 01-1 1h-2a1 1 0 01-1-1v-5a1 1 0 01-.293-.293L3.293 6.707A1 1 0 013 6V4z" />
-          </svg>
-          <select name="filter" id="filter"
-            onChange={
-              (e) => {
-                setFilter(e.target.value)
-              }
-            }
-            className=" text-red-950 focus:outline-none ">
-            {/* <option>{filter}</option> */}
-            <option value="ALL">All</option>
-            {songs.map((song) => (
-              <option key={song.id} value={song.category}>
-                {song.category}
-              </option>
-            ))}
-
-          </select>
-
-          <button onClick={() => {
-            fetchSongs(page, filter)
-          }}
-            className="bg-red-600/75 py-2 px-4 rounded-sm shadow-red-950/25"
-          >Find</button>
-        </div>
-      </div>
+      {localStorage.getItem("search_bar") === "on" && <Search_bar />}
 
       <div className="min-h-screen bg-gray-50 px-6 py-10 ">
 

@@ -33,7 +33,7 @@ export default function Login() {
       localStorage.setItem("token", access_token);
       localStorage.setItem("user", JSON.stringify(user));
 
-      navigate("/song_list");
+      navigate("/upload");
     } catch (err: any) {
       setError(
         err?.response?.data?.message || "Invalid email or password"
