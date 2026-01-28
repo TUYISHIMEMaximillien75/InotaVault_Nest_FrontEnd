@@ -90,6 +90,8 @@ export default function UploadSong() {
       await uploadSong(data);
       // console.log(data);
       alert("✅ Song uploaded successfully");
+      navigate("/dashboard/songs");
+
     } catch {
       setError("Upload failed. Please try again.");
     } finally {
@@ -165,7 +167,7 @@ export default function UploadSong() {
               </label>
               <input
                 type="text"
-                placeholder="e.g. Worship, Praise, Traditional"
+                placeholder="e.g. GUTURA, GUHAZWA, BIKIRAMARIYA, ISAKARAMENTU, etc."
                 onChange={(e) =>
                   setForm({ ...form, category: e.target.value })
                 }

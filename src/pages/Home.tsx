@@ -16,8 +16,22 @@ export default function Home() {
         </p>
 
         <div className="mt-10 flex gap-4">
+
+          <Link
+            to="/dashboard"
+            onClick={() => {
+              localStorage.setItem("journey_to", "/dashboard");
+            }}
+            className="px-8 py-3 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 transition"
+          >
+            Dashboard
+          </Link>
+
           <Link
             to="/songs"
+            onClick={() => {
+              localStorage.setItem("filter", "all");
+            }}
             className="px-8 py-3 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition"
           >
             Explore Songs
@@ -29,6 +43,7 @@ export default function Home() {
           >
             Upload Your Music
           </Link>
+
         </div>
       </section>
 

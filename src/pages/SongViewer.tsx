@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 import logo from "../assets/logo.png";
-import icon from "../assets/icon.png"
+import icon from "../assets/icon.png";
+import CommentsSection from "../components/CommentSection";
 
 interface Song {
   id: string;
@@ -17,267 +18,274 @@ interface Song {
   category?: string;
   likes?: number;
 }
-
+ 
 export default function SongView() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [song, setSong] = useState<Song | null>(null);
   const [relatedSongs, setRelatedSongs] = useState<Song[]>([]);
-  const [activeTab, setActiveTab] = useState<"video" | "pdf" | "audio">("video");
+  const [comments, setComments] = useState([]);
+  const [activeTab, setActiveTab] = useState<"video" | "pdf" | "audio">("pdf");
   const [loading, setLoading] = useState(true);
-
-  console.log("The song is ", song);
-
+  const [isLiked, setIsLiked] = useState(false);
+  const [active_comments, setActiveComments] = useState(false);
   useEffect(() => {
     fetchSong();
+    logInteraction();
+    getComments();
   }, [id]);
 
-  const viewSong = () =>{
-    console.log("view song");
+  const logInteraction = async () => {
     try {
-      api.post('/song-interactions',{
-        action:"view",
-        song_id:id,
-        user_id:localStorage.getItem("user_id")
-      }).then((res) => {
-        console.log(res.data);
-      }).catch((err) => {
-        console.log(err);
-      })
-      return true;
-    } catch (error) {
-      console.log(error);
-      return false;
-    }
-  }
+      await api.post('/song-interactions', {
+        action: "view",
+        song_id: id,
+        user_id: localStorage.getItem("user_id")
+      });
+    } catch (error) { console.log(error); }
+  };
 
   const fetchSong = async () => {
     setLoading(true);
     try {
       const res = await api.get(`/songs/song/${id}`);
       setSong(res.data);
-      // console.log("The song is set ", res.data);
-
-
-      // fetch related songs (same category or fallback)
-      const related = await api.get(
-        `songs/allsong?category=${res.data.category || "ALL"}&page=1&limit=6`
-      );
-      // console.log("Those are related ", related.data.paginatedSong.filter((s: Song) => s.id !== String(id)));
-      setRelatedSongs(
-        related.data.paginatedSong.filter((s: Song) => s.id !== String(id))
-      );
-
-      // console.log("Those are related ", res.data.category);
+      const related = await api.get(`songs/allsong?category=${res.data.category || "ALL"}&page=1&limit=6`);
+      setRelatedSongs(related.data.paginatedSong.filter((s: Song) => s.id !== String(id)));
     } catch (error) {
-      console.error("Failed to load song", error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  const getYoutubeEmbedUrl = (url: string): string | null => {
+
+
+  const handleLike = async () => {
     try {
-      const parsed = new URL(url);
-
-      // https://www.youtube.com/watch?v=VIDEO_ID
-      if (parsed.hostname.includes("youtube.com")) {
-        const videoId = parsed.searchParams.get("v");
-        return videoId
-          ? `https://www.youtube.com/embed/${videoId}`
-          : null;
-      }
-
-      // https://youtu.be/VIDEO_ID
-      if (parsed.hostname.includes("youtu.be")) {
-        return `https://www.youtube.com/embed${parsed.pathname}`;
-      }
-
-      return null;
-    } catch {
-      return null;
+      await api.post(`/likes?song_id=${id}`);
+      setIsLiked(true);
+      if (song) setSong({ ...song, likes: (song.likes || 0) + 1 });
+    } catch (err: any) {
+      alert("Please log in to like this song");
     }
   };
 
-  const likeSong = async () => {
-    await api.post(`/likes?song_id=${id}`).then((res) => {
-      console.log(res.data);
-    }).catch((err) => {
-      alert(err.response.data.message + "\nLog In to like the song");
-    })
-  }
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    alert("Link copied to clipboard!");
+  };
 
+  const getComments = async () => {
+    try {
+      const res = await api.get(`/comments/allComments?song_id=${id}`);
+      setComments(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getYoutubeEmbedUrl = (url: string) => {
+    try {
+      const parsed = new URL(url);
+      const videoId = parsed.searchParams.get("v") || parsed.pathname.split("/").pop();
+      return `https://www.youtube.com/embed/${videoId}`;
+    } catch { return null; }
+  };
 
   if (loading || !song) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
-          {/* Spinner */}
-          <div className="w-12 h-12 border-4 border-red-700 border-t-transparent border-solid rounded-full animate-spin"></div>
-
-          {/* Animated text */}
-          <div className="flex space-x-1">
-            <span className="animate-ping">.</span>
-            <span className="animate-ping animation-delay-200">.</span>
-            <span className="animate-ping animation-delay-400">.</span>
-          </div>
-
-          <p className="text-gray-600 text-lg font-medium">Loading a song</p>
-          <img src={icon} className=" animate-bounce max-w-20" alt="" />
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        <div className="w-16 h-16 border-4 border-red-700 border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 text-gray-500 font-medium">Loading Song...</p>
       </div>
-
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* HEADER */}
-      <div className="flex items-center gap-4 p-4 bg-white shadow">
-        <img src={logo} className="h-10 cursor-pointer" onClick={() => navigate("/songs")} />
-        <h1 className="text-xl font-bold">{song.name}</h1>
-      </div>
+    <div className="min-h-screen bg-[#F9FAFB]">
+      {/* PROFESSIONAL NAVBAR */}
+      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-4">
+          <img src={logo} className="h-9 cursor-pointer hover:opacity-80 transition" onClick={() => navigate("/songs")} alt="Logo" />
+          <div className="h-6 w-[1px] bg-gray-200 mx-2 hidden md:block" />
+          <h1 className="text-lg font-bold text-gray-800 truncate max-w-md">{song.name}</h1>
+        </div>
+        <button onClick={() => navigate("/songs")} className="text-sm font-semibold text-gray-500 hover:text-red-700 transition">
+          Back to Library
+        </button>
+      </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
-        {/* MAIN VIEW */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow p-4">
-          {/* TABS */}
-          <div className="flex gap-3 mb-4">
-            {(song.video_file || song.external_link) && (
-              <button
-                onClick={() => setActiveTab("video")}
-                className={`px-4 py-2 rounded ${activeTab === "video"
-                  ? "bg-red-700 text-white"
-                  : "bg-gray-200"
-                  }`}
-              >
-                🎬 Video
-              </button>
-            )}
+      <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 p-6">
 
-            {song.pdf_sheet && (
-              <button
-                onClick={() => setActiveTab("pdf")}
-                className={`px-4 py-2 rounded ${activeTab === "pdf"
-                  ? "bg-red-700 text-white"
-                  : "bg-gray-200"
-                  }`}
-              >
-                📄 PDF
-              </button>
-            )}
+        {/* LEFT COLUMN: PLAYER & INFO */}
+        <div className="lg:col-span-8 space-y-6">
 
-            {song.audio_file && (
-              <button
-                onClick={() => setActiveTab("audio")}
-                className={`px-4 py-2 rounded ${activeTab === "audio"
-                  ? "bg-red-700 text-white"
-                  : "bg-gray-200"
-                  }`}
-              >
-                🎧 Audio
-              </button>
-            )}
-          </div>
+          {/* MEDIA VIEWER */}
+          <div className="bg-black rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
+            <div className="flex bg-gray-900 p-2 gap-2">
+              {song.video_file || song.external_link && (
+                <button
+                  onClick={() => setActiveTab("video")}
+                  className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition ${activeTab === "video" ? 'bg-red-700 text-white' : 'text-gray-400 hover:bg-gray-800'}`}
+                >
+                  Video
+                </button>
+              )}
+              {song.pdf_sheet && (
+                <button
+                  onClick={() => setActiveTab("pdf")}
+                  className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition ${activeTab === "pdf" ? 'bg-red-700 text-white' : 'text-gray-400 hover:bg-gray-800'}`}
+                >
+                  Sheet Music
+                </button>
+              )}
+              {song.audio_file && (
+                <button
+                  onClick={() => setActiveTab("audio")}
+                  className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition ${activeTab === "audio" ? 'bg-red-700 text-white' : 'text-gray-400 hover:bg-gray-800'}`}
+                >
+                  Audio Only
+                </button>
+              )}
+            </div>
 
-          {/* CONTENT */}
-          <div className="bg-white rounded-lg overflow-hidden border">
-            {viewSong()}
-            {/* VIDEO */}
-            {activeTab === "video" && (
-              <>
-                {song.video_file ? (
-                  <video
-                    controls
-                    src={song.video_file}
-                    className="w-full h-[420px]"
-                  />
-                ) : song.external_link && getYoutubeEmbedUrl(song.external_link) ? (
-                  <iframe
-                    src={getYoutubeEmbedUrl(song.external_link)!}
-                    className="w-full h-[420px]"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
+            <div className="aspect-video bg-black flex items-center justify-center">
+              {activeTab === "video" && (
+                song.video_file ? (
+                  <video controls src={song.video_file} className="w-full h-full" />
                 ) : (
-                  <div className="p-10 text-gray-500 text-center">
-                    No video available
-                  </div>
-                )}
-              </>
+                  <iframe src={getYoutubeEmbedUrl(song.external_link!)!} className="w-full h-full" allowFullScreen />
+                )
+              )}
+              {activeTab === "pdf" && (
+                <iframe src={song.pdf_sheet} className="w-full h-full bg-white" title="PDF" />
+              )}
+              {activeTab === "audio" && (
+                <div className="w-full h-full flex flex-col items-center justify-center bg-gray-900 p-12">
+                  <img src={icon} className="w-24 mb-8 opacity-20" alt="" />
+                  <audio controls className="w-full max-w-md shadow-lg rounded-full"><source src={song.audio_file} /></audio>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* SONG INFO & ACTIONS */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-50 pb-6">
+              <div>
+                <h2 className="text-2xl font-extrabold text-gray-900">{song.name}</h2>
+                <p className="text-red-700 font-semibold mt-1">Artist: {song.artist} <span className="text-gray-300 mx-2">|</span> {song.category}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="px-4 py-2 text-gray-400 text-sm font-medium">
+                  {song.view_count.toLocaleString()} views
+                </div>
+                <button onClick={handleLike} className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold transition-all ${isLiked ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                  <svg className="w-5 h-5" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                  {song.likes || 0}
+                </button>
+
+                {/* comment button */}
+
+                <button onClick={() => setActiveComments(active_comments ? false : true)} className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold transition-all ${active_comments ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                  <span>{comments.length} </span>
+                   comments
+                </button>
+
+                <button onClick={handleShare} className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-600 rounded-full font-bold hover:bg-gray-200 transition-all">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                  Share
+                </button>
+              </div>
+            </div>
+
+            {active_comments && (
+              <CommentsSection songId={song.id} />
+            )}
+            {!active_comments && (
+              <div className="mt-6">
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Description</h4>
+                <p className="text-gray-600 leading-relaxed whitespace-pre-line">{song.description || "No description provided for this song."}</p>
+              </div>
             )}
 
-            {/* PDF */}
-            {activeTab === "pdf" && song.pdf_sheet && (
-              <div className="relative h-[600px]">
-                <iframe
-                  src={`${song.pdf_sheet}`}
-                  className="w-full h-full"
-                  title="PDF Preview"
+          </div>
+
+          {/* COMMENTS SECTION */}
+          {/* <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+              Comments ({comments.length})
+            </h3>
+            
+            <div className="flex gap-4 mb-8">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-700 font-bold shrink-0">U</div>
+              <div className="flex-1 space-y-3">
+                <textarea 
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Add a comment..."
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-700/20 transition resize-none"
+                  rows={2}
                 />
-                <p className="absolute bottom-2 right-2 text-xs text-gray-400">
-                  PDF Preview
-                </p>
-              </div>
-            )}
-
-            {/* AUDIO */}
-            {activeTab === "audio" && song.audio_file && (
-              <div className="p-6 bg-gray-100">
-                <audio controls className="w-full">
-                  <source src={song.audio_file} />
-                </audio>
-              </div>
-            )}
-          </div>
-
-          <div className="more flex gap-4 mt-4">
-            <div className="artist">
-              <span>Par: {song.artist}</span>
-            </div>
-            <div className="category">
-              <span className="text-gray-600 font-bold">{song.category}</span>
-            </div>
-            {/* Views */}
-            <div className=" text-gray-600">
-              Views: {song.view_count}
-            </div>
-            <div className="like_button">
-              <button onClick={likeSong}
-                className="bg-gray-200 text-gray-600 px-2 py-1 rounded font-bold">Like: {song.likes}</button>
-            </div>
-          </div>
-          <div className="description">
-            <p> <span className=" italic text-gray-600">Descripion:</span><br />{song.description}</p>
-          </div>
-        </div>
-
-        {/* RELATED SONGS */}
-        <div className="bg-white rounded-xl shadow p-4">
-          <h2 className="font-semibold mb-4">Related Songs</h2>
-
-          <div className="space-y-3 max-h-[600px] overflow-y-auto">
-            {relatedSongs.map((s) => (
-              <div
-                key={s.id}
-                onClick={() => navigate(`/songs/${s.id}`)}
-                className="flex gap-3 items-center cursor-pointer hover:bg-gray-100 p-2 rounded"
-              >
-                <div className="w-16 h-12 bg-gray-200 flex items-center justify-center">
-                  {s.video_file ? "🎬" : s.pdf_sheet ? "📄" : "🎧"}
-                </div>
-                <div>
-                  <p className="font-medium text-sm">{s.name}</p>
-                  <p className="text-xs text-gray-500">
-                    {s.view_count} views
-                  </p>
+                <div className="flex justify-end">
+                  <button onClick={postComment} className="bg-red-700 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-red-800 transition shadow-md shadow-red-700/20">Post Comment</button>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+
+            <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+              {comments.map((c) => (
+                <div key={c.id} className="flex gap-4 group">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold shrink-0 uppercase">{c.user_name?.[0] || 'A'}</div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-bold text-gray-900">{c.user_name || "Anonymous User"}</span>
+                      <span className="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">Just now</span>
+                    </div>
+                    <p className="text-sm text-gray-600 leading-normal">{c.text}</p>
+                  </div>
+                </div>
+              ))}
+              {comments.length === 0 && <p className="text-center text-gray-400 text-sm py-10 italic">No comments yet. Be the first to share your thoughts!</p>}
+            </div>
+          </div> */}
         </div>
-      </div>
+
+        {/* RIGHT COLUMN: RELATED CONTENT */}
+        <aside className="lg:col-span-4 space-y-6">
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <h3 className="font-bold text-gray-900 mb-4 flex items-center justify-between">
+              <span>Up Next</span>
+              <span className="text-[10px] bg-red-50 text-red-700 px-2 py-0.5 rounded-full uppercase tracking-tighter">Similar</span>
+            </h3>
+
+            <div className="space-y-4">
+              {relatedSongs.map((s) => (
+                <div
+                  key={s.id}
+                  onClick={() => navigate(`/songs/${s.id}`)}
+                  className="flex gap-3 group cursor-pointer p-2 rounded-xl hover:bg-gray-50 transition-all border border-transparent hover:border-gray-100"
+                >
+                  <div className="w-28 h-16 bg-gray-900 rounded-lg overflow-hidden shrink-0 relative">
+                    <div className="absolute inset-0 flex items-center justify-center text-white text-lg opacity-40 group-hover:opacity-100 transition">
+                      {s.video_file ? "🎬" : s.pdf_sheet ? "📄" : "🎧"}
+                    </div>
+                  </div>
+                  <div className="flex flex-col justify-center min-w-0">
+                    <p className="font-bold text-sm text-gray-800 line-clamp-1 group-hover:text-red-700 transition">{s.name}</p>
+                    <p className="text-[11px] text-gray-500 font-medium mt-1 uppercase tracking-wider">{s.artist}</p>
+                    <p className="text-[10px] text-gray-400 mt-1">{s.view_count.toLocaleString()} views</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+      </main>
     </div>
   );
 }

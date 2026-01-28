@@ -7,4 +7,4 @@ export const loginUser = (data: any) =>
   api.post("/login", data);
 
 export const getProfile = () =>
-  api.get("/profile");
+  api.get("auth/profile");
