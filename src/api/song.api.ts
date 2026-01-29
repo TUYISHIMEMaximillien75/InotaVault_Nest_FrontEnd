@@ -6,10 +6,22 @@ export const getAllSongs = () =>
 export const getSongById = (id: string) =>
   api.get(`/songs/${id}`);
 
-export const uploadSong = (data: FormData) =>
-  api.post("/songs", data, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+export const uploadSong = (data: FormData) => {
+  return api.post("/songs/upload", data);
+};
+
+export const getAllCategories = () =>
+  api.get("/songs/categories");
+
+export const searchSong = (query: string) =>
+  api.get(`/songs/search?query=${query}`);
+
+export const searchInSong = (query: string) =>
+  api.get(`/songs/searchinmylibrary?query=${query}`);
+
+export const getSongByUploaderId = async (uploaderId: string) =>{
+  return await api.get(`/songs/uploader?uploader_id=${uploaderId}`);
+}
 
 export const updateSong = (id: string, data: any) =>
   api.put(`/songs/${id}`, data);
