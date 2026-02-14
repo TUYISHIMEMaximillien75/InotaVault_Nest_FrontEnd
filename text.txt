@@ -1,0 +1,17 @@
+wow this is exactly what I was thinking, but we need to make another simple changes on desgn . 
+1. there on event type make a select where user select an event type or add another.
+2. If user selected Holy mass on event type down there should be default/ or tamplate of basic section of holly Mass but he can add anothe sections even between existing/template sections.
+3. so down there on selecting/searching song to add in sections use a form field, but when he is typing a list of song visible so that he can you a song from list of results.
+another thing here before user start typing, after focus on field he may see the two buttons {add from your device, type normal text}
+
+see what I am thinking
+
+._____________________________________.
+|        search song                  |
+|-------------------------------------|
+|        results after typing         |
+|-------------------------------------|
+|     Add from your device            |
+|-------------------------------------|
+|     type normal text----------------|
+|_____________________________________|

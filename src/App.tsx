@@ -13,6 +13,7 @@ import DashboardLayout from "./Dashboard/DashboardLayout";
 import DashboardHome from "./Dashboard/DashboardHome";
 import DashboardSongs from "./Dashboard/DashboardSongs";
 import DashboardReperitories from "./Dashboard/DashboardReperitories";
+import CreateReperitoire from "./components/reperitoire/CreateReperitoire";
 
 export default function App() {
   return (
@@ -45,6 +46,7 @@ export default function App() {
             <Route path="/dashboard/songs" element={<DashboardSongs/>}></Route>
             <Route path="/dashboard/upload" element={<UploadSong/>}></Route>
             <Route path="/dashboard/repertoires" element={<DashboardReperitories/>}></Route>
+            <Route path="/dashboard/create_repertoires" element={<CreateReperitoire/>}></Route>
             <Route path="/dashboard/profile" element={<DashboardHome/>}></Route>
           </Route>
       </Routes>

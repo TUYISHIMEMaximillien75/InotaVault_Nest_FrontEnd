@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import icon from "../assets/icon.png";
 import { useNavigate } from "react-router-dom";
+import logo from "../assets/logo.png";
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -66,12 +67,7 @@ const Sidebar = () => {
       >
         {/* LOGO SECTION */}
         <div className="p-8 hidden lg:flex items-center gap-3">
-          <div className="bg-red-700 p-2 rounded-xl shadow-lg shadow-red-200">
-            <Music size={24} className="text-white" />
-          </div>
-          <h1 className="font-bold text-2xl tracking-tight text-gray-900">
-            InotaVault
-          </h1>
+          <img src={logo} alt="" />
         </div>
 
         {/* NAVIGATION */}
