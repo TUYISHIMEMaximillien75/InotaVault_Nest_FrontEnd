@@ -8,30 +8,30 @@ import { searchInSong } from "../api/song.api";
 export default function DashboardSongs() {
     const [songs, setSongs] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [minLoading, setMinLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [_minLoading, setMinLoading] = useState(true);
+    const [_error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState("")
 
 
-    useEffect(()=>{
+    useEffect(() => {
         if (searchQuery) {
-            const delayDebounce = setTimeout(async() => {
-            setMinLoading(true)
+            const delayDebounce = setTimeout(async () => {
+                setMinLoading(true)
 
-            try {
-                const res = await searchInSong(searchQuery)
-                        setSongs(res.data)
-            } catch (error:any) {
-                setError(error)
-            }
-            setMinLoading(false)
-        }, 500)
+                try {
+                    const res = await searchInSong(searchQuery)
+                    setSongs(res.data)
+                } catch (error: any) {
+                    setError(error)
+                }
+                setMinLoading(false)
+            }, 500)
 
-        return() => clearTimeout(delayDebounce)
+            return () => clearTimeout(delayDebounce)
         }
-        
 
-    },[searchQuery])
+
+    }, [searchQuery])
     // --- PAGINATION STATE ---
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 4;

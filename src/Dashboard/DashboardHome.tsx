@@ -6,17 +6,17 @@ import type { DashboardData } from "../types/song";
 import { NavLink } from "react-router-dom";
 
 export default function DashboardHome() {
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState<any>(null);
     const [songs, setSongs] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [_error, setError] = useState(null);
 
     const token = localStorage.getItem("token");
     if (!token) {
         window.location.href = "/login";
     }
     const userDetails = JSON.parse(localStorage.getItem("user") || "{}");
-    if(!userDetails){
+    if (!userDetails) {
         setUser(userDetails);
     }
     useEffect(() => {
