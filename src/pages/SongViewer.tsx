@@ -4,6 +4,9 @@ import { api } from "../api/api";
 import logo from "../assets/logo.png";
 import icon from "../assets/icon.png";
 import CommentsSection from "../components/CommentSection";
+import { getLikes, postLikes } from "../api/likes.api";
+import SuccessMessage from "../components/SuccessMessage";
+import FailMessage from "../components/FailMessage";
 
 interface Song {
   id: string;
@@ -18,7 +21,7 @@ interface Song {
   category?: string;
   likes?: number;
 }
- 
+
 export default function SongView() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -29,11 +32,17 @@ export default function SongView() {
   const [activeTab, setActiveTab] = useState<"video" | "pdf" | "audio">("pdf");
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
+  const [likes, setLikes] = useState(0);
   const [active_comments, setActiveComments] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [success_message, setSuccessMessage] = useState("");
+  const [showFail, setShowFail] = useState(false);
+  const [fail_message, setFailMessage] = useState("");
   useEffect(() => {
     fetchSong();
     logInteraction();
     getComments();
+    getLikesCount();
   }, [id]);
 
   const logInteraction = async () => {
@@ -64,17 +73,32 @@ export default function SongView() {
 
   const handleLike = async () => {
     try {
-      await api.post(`/likes?song_id=${id}`);
+      const res = await postLikes(id!);
+      console.log(res.data)
+      setLikes(res.data)
       setIsLiked(true);
       if (song) setSong({ ...song, likes: (song.likes || 0) + 1 });
     } catch (err: any) {
-      alert("Please log in to like this song");
+      setShowFail(true);
+      setFailMessage("Please log in to like this song");
+      setTimeout(() => setShowFail(false), 3000);
+    }
+  };
+
+  const getLikesCount = async () => {
+    try {
+      const res = await getLikes(id!);
+      setLikes(res.data)
+    } catch (error) {
+      console.error(error);
     }
   };
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
-    alert("Link copied to clipboard!");
+    setSuccessMessage("Link copied to clipboard!");
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
   };
 
   const getComments = async () => {
@@ -113,9 +137,12 @@ export default function SongView() {
           <h1 className="text-lg font-bold text-gray-800 truncate max-w-md">{song.name}</h1>
         </div>
         <button onClick={() => navigate("/songs")} className="text-sm font-semibold text-gray-500 hover:text-red-700 transition">
+          {showSuccess && <SuccessMessage success_message={success_message} />}
+          {showFail && <FailMessage fail_message={fail_message} />}
           Back to Library
         </button>
       </header>
+
 
       <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 p-6">
 
@@ -178,25 +205,39 @@ export default function SongView() {
                 <h2 className="text-2xl font-extrabold text-gray-900">{song.name}</h2>
                 <p className="text-red-700 font-semibold mt-1">Artist: {song.artist} <span className="text-gray-300 mx-2">|</span> {song.category}</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center flex-wrap gap-2">
+                {/* Views Count */}
                 <div className="px-4 py-2 text-gray-400 text-sm font-medium">
-                  {song.view_count.toLocaleString()} views
+                  <span>{song.view_count.toLocaleString()}</span> Views
                 </div>
+
+                {/* Like Button */}
                 <button onClick={handleLike} className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold transition-all ${isLiked ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
                   <svg className="w-5 h-5" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                  {song.likes || 0}
+                  <span>{likes}</span>
                 </button>
 
-                {/* comment button */}
-
-                <button onClick={() => setActiveComments(active_comments ? false : true)} className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold transition-all ${active_comments ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
-                  <span>{comments.length} </span>
-                   comments
+                {/* Comment Button */}
+                <button onClick={() => setActiveComments(!active_comments)} className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold transition-all ${active_comments ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                  <span>{comments.length}</span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+                  <span className="hidden md:inline">Comments</span>
                 </button>
 
+                {/* NEW: Download Button */}
+                <a
+                  href={song.pdf_sheet} download
+                  className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-600 rounded-full font-bold hover:bg-red-700 hover:text-white transition-all group"
+                >
+                  <svg className="w-5 h-5 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  <span className="hidden md:inline">Download</span>
+                </a>
+
+                {/* Share Button */}
                 <button onClick={handleShare} className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-600 rounded-full font-bold hover:bg-gray-200 transition-all">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
-                  Share
                 </button>
               </div>
             </div>
@@ -212,46 +253,6 @@ export default function SongView() {
             )}
 
           </div>
-
-          {/* COMMENTS SECTION */}
-          {/* <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
-              Comments ({comments.length})
-            </h3>
-            
-            <div className="flex gap-4 mb-8">
-              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-700 font-bold shrink-0">U</div>
-              <div className="flex-1 space-y-3">
-                <textarea 
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Add a comment..."
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-700/20 transition resize-none"
-                  rows={2}
-                />
-                <div className="flex justify-end">
-                  <button onClick={postComment} className="bg-red-700 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-red-800 transition shadow-md shadow-red-700/20">Post Comment</button>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-              {comments.map((c) => (
-                <div key={c.id} className="flex gap-4 group">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold shrink-0 uppercase">{c.user_name?.[0] || 'A'}</div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-bold text-gray-900">{c.user_name || "Anonymous User"}</span>
-                      <span className="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">Just now</span>
-                    </div>
-                    <p className="text-sm text-gray-600 leading-normal">{c.text}</p>
-                  </div>
-                </div>
-              ))}
-              {comments.length === 0 && <p className="text-center text-gray-400 text-sm py-10 italic">No comments yet. Be the first to share your thoughts!</p>}
-            </div>
-          </div> */}
         </div>
 
         {/* RIGHT COLUMN: RELATED CONTENT */}

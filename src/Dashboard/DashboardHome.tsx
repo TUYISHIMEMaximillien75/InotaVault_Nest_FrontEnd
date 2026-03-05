@@ -6,17 +6,17 @@ import type { DashboardData } from "../types/song";
 import { NavLink } from "react-router-dom";
 
 export default function DashboardHome() {
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState<any>(null);
     const [songs, setSongs] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [_error, setError] = useState(null);
 
     const token = localStorage.getItem("token");
     if (!token) {
         window.location.href = "/login";
     }
     const userDetails = JSON.parse(localStorage.getItem("user") || "{}");
-    if(!userDetails){
+    if (!userDetails) {
         setUser(userDetails);
     }
     useEffect(() => {
@@ -116,9 +116,9 @@ export default function DashboardHome() {
                         ➕ Upload Song
                     </NavLink>
 
-                    <button className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition">
+                    <NavLink to="/dashboard/create_repertoires" className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition">
                         📚 Create Repertoire
-                    </button>
+                    </NavLink>
 
                     <button className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition">
                         📄 Generate PDF

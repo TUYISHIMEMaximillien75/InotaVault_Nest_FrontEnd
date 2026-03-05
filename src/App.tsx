@@ -13,6 +13,7 @@ import DashboardLayout from "./Dashboard/DashboardLayout";
 import DashboardHome from "./Dashboard/DashboardHome";
 import DashboardSongs from "./Dashboard/DashboardSongs";
 import DashboardReperitories from "./Dashboard/DashboardReperitories";
+import CreateRepertoire from "./pages/dashboard/CreateRepertoire";
 
 export default function App() {
   return (
@@ -21,7 +22,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/songs" element={<Songs />} />
         {/* <Route path="/songs/:id" element={<SongDetail />} /> */}
-          <Route path="/songs/:id" element={<SongViewer />} />
+        <Route path="/songs/:id" element={<SongViewer />} />
         <Route
           path="/upload"
           element={
@@ -30,23 +31,24 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/login" element={<Login/>}></Route>
-        <Route path="/register" element={<Register/>}></Route>
-        <Route path="auth/verify/:user_id" element={<Verify/>}></Route>
+        <Route path="/login" element={<Login />}></Route>
+        <Route path="/register" element={<Register />}></Route>
+        <Route path="auth/verify/:user_id" element={<Verify />}></Route>
 
-          {/* Authorized routes */}
+        {/* Authorized routes */}
 
-          <Route path="/song_list" element={<SongList/>}></Route>
-        <Route path="/upload" element={<UploadSong/>}></Route>
+        <Route path="/song_list" element={<SongList />}></Route>
+        <Route path="/upload" element={<UploadSong />}></Route>
 
-          {/* Dashboard routes */}
-          <Route path="/dashboard" element={<DashboardLayout/>}>
-            <Route index element={<DashboardHome/>}></Route>
-            <Route path="/dashboard/songs" element={<DashboardSongs/>}></Route>
-            <Route path="/dashboard/upload" element={<UploadSong/>}></Route>
-            <Route path="/dashboard/repertoires" element={<DashboardReperitories/>}></Route>
-            <Route path="/dashboard/profile" element={<DashboardHome/>}></Route>
-          </Route>
+        {/* Dashboard routes */}
+        <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route index element={<DashboardHome />}></Route>
+          <Route path="/dashboard/songs" element={<DashboardSongs />}></Route>
+          <Route path="/dashboard/upload" element={<UploadSong />}></Route>
+          <Route path="/dashboard/repertoires" element={<DashboardReperitories />}></Route>
+          <Route path="/dashboard/create_repertoires" element={<CreateRepertoire />}></Route>
+          <Route path="/dashboard/profile" element={<DashboardHome />}></Route>
+        </Route>
       </Routes>
     </BrowserRouter>
   );

@@ -1,5 +1,5 @@
 import Sidebar from "./Sidebar";
-import { Bell, Search, UserCircle } from "lucide-react";
+import { Bell, UserCircle } from "lucide-react";
 import { Outlet } from "react-router-dom";
 
 const DashboardLayout = () => {
@@ -10,7 +10,7 @@ const DashboardLayout = () => {
 
       {/* 2. Main Content Area */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        
+
         {/* 3. Top Header - Professional Navbar */}
         <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-8 sticky top-0 z-30">
           <div className="flex items-center gap-4 flex-1">
@@ -50,7 +50,7 @@ const DashboardLayout = () => {
             {/* Fade-in Animation wrapper (optional) */}
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
             </div>
-            <Outlet/>
+            <Outlet />
           </div>
         </main>
 

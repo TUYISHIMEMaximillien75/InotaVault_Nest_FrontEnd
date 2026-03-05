@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { api } from "../api/api.ts";
+// import { api } from "../api/api.ts";
 import { getComments } from "../api/comments.api";
 import { postComments } from "../api/comments.api";
 import { useNavigate } from "react-router-dom";

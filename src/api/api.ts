@@ -2,5 +2,6 @@ import axios from "axios";
 
 export const api = axios.create({
   // baseURL: "https://backendinotavault-production.up.railway.app/",
-  baseURL: "http://localhost:3000/",
+  // baseURL: "https://backendinotavault-production.up.railway.app/",
+  baseURL: "http://localhost:3000",
 });
