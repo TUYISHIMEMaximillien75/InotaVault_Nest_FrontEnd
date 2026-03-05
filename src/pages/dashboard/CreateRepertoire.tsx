@@ -4,11 +4,13 @@ import EventTypeSelect from "../../components/repertoire/EventTypeSelect";
 import SectionCard from "../../components/repertoire/SectionCard";
 import { HolyMassTemplate } from "../../components/repertoire/HolyMassTemplate";
 import type { EventType, Section, SongItem } from "../../types/repertoire";
+import { createRepertoire } from "../../api/repertoire.api";
 
 const CreateRepertoire: React.FC = () => {
     const [eventType, setEventType] = useState<EventType | "">("");
     const [sections, setSections] = useState<Section[]>([]);
     const [repertoireTitle, setRepertoireTitle] = useState("");
+    const [saving, setSaving] = useState(false);
 
     // Auto-load template for Holy Mass
     useEffect(() => {
@@ -69,25 +71,51 @@ const CreateRepertoire: React.FC = () => {
         }));
     };
 
-    const handleSave = () => {
-        console.log("Saving Repertoire:", {
-            title: repertoireTitle,
-            type: eventType,
-            sections
-        });
-        alert("Repertoire saved (mock)!");
+    const handleSave = async () => {
+        if (!repertoireTitle.trim()) {
+            alert("Please enter a repertoire title.");
+            return;
+        }
+        if (!eventType) {
+            alert("Please select an event type.");
+            return;
+        }
+        setSaving(true);
+        try {
+            await createRepertoire({
+                title: repertoireTitle,
+                event_type: eventType,
+                sections: sections.map((section, i) => ({
+                    name: section.name,
+                    position: i,
+                    songs: section.songs.map((song, j) => ({
+                        song_id: song.source === "existing" ? song.id : undefined,
+                        title: song.title,
+                        source: song.source,
+                        file_uri: song.uri ?? undefined,
+                        position: j,
+                    })),
+                })),
+            });
+            alert("Repertoire saved successfully!");
+        } catch (err) {
+            console.error("Failed to save repertoire", err);
+            alert("Failed to save. Please try again.");
+        } finally {
+            setSaving(false);
+        }
     };
 
     return (
         <div className="max-w-4xl mx-auto p-6 space-y-8">
             <div className="space-y-2">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create New Repertoire</h1>
-                <p className="text-gray-500 dark:text-gray-400">Assemble your perfect song list for any occasion.</p>
+                <h1 className="text-3xl font-bold text-red-700 ">Create New Repertoire</h1>
+                <p className="text-gray-500 ">Assemble your perfect song list for any occasion.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <div className="space-y-4">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="block text-sm font-medium text-red-700 ">
                         Repertoire Title
                     </label>
                     <input
@@ -95,7 +123,7 @@ const CreateRepertoire: React.FC = () => {
                         value={repertoireTitle}
                         onChange={(e) => setRepertoireTitle(e.target.value)}
                         placeholder="e.g., Sunday Mass - Easter"
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 outline-none bg-transparent dark:text-white"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none bg-transparent"
                     />
                 </div>
                 <div>
@@ -105,7 +133,7 @@ const CreateRepertoire: React.FC = () => {
 
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                    <h2 className="text-xl font-semibold text-gray-800">
                         Sections
                     </h2>
                     <button
@@ -119,8 +147,8 @@ const CreateRepertoire: React.FC = () => {
 
                 <div className="space-y-4">
                     {sections.length === 0 ? (
-                        <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
-                            <p className="text-gray-500 dark:text-gray-400">
+                        <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                            <p className="text-gray-500">
                                 No sections yet. Select an event type or add a section manually.
                             </p>
                         </div>
@@ -141,12 +169,13 @@ const CreateRepertoire: React.FC = () => {
                 </div>
             </div>
 
-            <div className="flex justify-end pt-6 border-t border-gray-100 dark:border-gray-700">
+            <div className="flex justify-end pt-6 border-t border-gray-100">
                 <button
                     onClick={handleSave}
-                    className="px-8 py-3 bg-red-700 hover:bg-red-800 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
+                    disabled={saving}
+                    className="px-8 py-3 bg-red-700 hover:bg-red-800 disabled:opacity-60 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
                 >
-                    Save Repertoire
+                    {saving ? "Saving..." : "Save Repertoire"}
                 </button>
             </div>
         </div>

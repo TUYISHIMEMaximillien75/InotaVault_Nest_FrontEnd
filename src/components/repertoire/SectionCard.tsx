@@ -33,16 +33,16 @@ const SectionCard: React.FC<SectionCardProps> = ({
 
     return (
         // return (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-all hover:shadow-md">
-            <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gray-50/50 dark:bg-gray-700/30 rounded-t-xl">
-                <h3 className="font-semibold text-lg text-gray-800 dark:text-white">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 transition-all hover:shadow-md">
+            <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 rounded-t-xl">
+                <h3 className="font-semibold text-lg text-gray-800">
                     {section.name}
                 </h3>
                 <div className="flex items-center space-x-1">
                     <button
                         onClick={() => onMoveSection(index, "up")}
                         disabled={index === 0}
-                        className="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        className="p-1.5 rounded-md hover:bg-gray-200 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         title="Move Up"
                     >
                         <ArrowUp className="w-4 h-4" />
@@ -50,15 +50,15 @@ const SectionCard: React.FC<SectionCardProps> = ({
                     <button
                         onClick={() => onMoveSection(index, "down")}
                         disabled={index === totalSections - 1}
-                        className="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        className="p-1.5 rounded-md hover:bg-gray-200 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         title="Move Down"
                     >
                         <ArrowDown className="w-4 h-4" />
                     </button>
-                    <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                    <div className="w-px h-4 bg-gray-300 mx-1"></div>
                     <button
                         onClick={() => onRemoveSection(section.id)}
-                        className="p-1.5 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-400 hover:text-red-600 transition-colors"
+                        className="p-1.5 rounded-md hover:bg-red-100 text-gray-400 hover:text-red-600 transition-colors"
                         title="Remove Section"
                     >
                         <Trash2 className="w-4 h-4" />
@@ -73,17 +73,17 @@ const SectionCard: React.FC<SectionCardProps> = ({
                         {section.songs.map((song) => (
                             <li
                                 key={song.id}
-                                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-700 group hover:border-blue-200 dark:hover:border-blue-800 transition-all"
+                                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 group hover:border-red-200 transition-all"
                             >
                                 <div className="flex items-center space-x-3">
-                                    <div className="p-2 bg-white dark:bg-gray-800 rounded-full shadow-sm">
+                                    <div className="p-2 bg-white rounded-full shadow-sm">
                                         {getSongIcon(song.source)}
                                     </div>
-                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                                    <span className="text-sm font-medium text-gray-700">
                                         {song.title}
                                     </span>
                                     {song.source === "uploaded" && (
-                                        <span className="text-[10px] px-1.5 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 rounded-full">FILE</span>
+                                        <span className="text-[10px] px-1.5 py-0.5 bg-red-100 text-red-700 rounded-full">FILE</span>
                                     )}
                                 </div>
                                 <button

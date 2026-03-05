@@ -36,27 +36,27 @@ const EventTypeSelect: React.FC<EventTypeSelectProps> = ({
 
     return (
         <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-red-700 mb-1">
                 Event Type
             </label>
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full flex items-center justify-between px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent text-left"
+                className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent text-left"
             >
-                <span className="block truncate text-gray-900 dark:text-white font-medium">
+                <span className="block truncate text-gray-900 font-medium">
                     {selectedType || "Select an event type"}
                 </span>
                 <ChevronDown className="w-4 h-4 text-gray-500" />
             </button>
 
             {isOpen && (
-                <div className="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-100 dark:border-gray-700 py-1">
+                <div className="absolute z-20 w-full mt-1 bg-white rounded-lg shadow-xl border border-gray-100 py-1">
                     {availableTypes.map((type) => (
                         <button
                             key={type}
                             onClick={() => handleSelect(type)}
-                            className="w-full flex items-center justify-between px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                            className="w-full flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                         >
                             <span>{type}</span>
                             {selectedType === type && (
@@ -65,11 +65,11 @@ const EventTypeSelect: React.FC<EventTypeSelectProps> = ({
                         </button>
                     ))}
 
-                    <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1 p-2">
+                    <div className="border-t border-gray-100 mt-1 pt-1 p-2">
                         {!isAddingCustom ? (
                             <button
                                 onClick={() => setIsAddingCustom(true)}
-                                className="w-full flex items-center space-x-2 px-2 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                                className="w-full flex items-center space-x-2 px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors"
                             >
                                 <Plus className="w-4 h-4" />
                                 <span>Add Custom Event...</span>
@@ -81,7 +81,7 @@ const EventTypeSelect: React.FC<EventTypeSelectProps> = ({
                                     value={customType}
                                     onChange={(e) => setCustomType(e.target.value)}
                                     placeholder="Enter event name..."
-                                    className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-red-500 outline-none bg-transparent text-gray-900 dark:text-white"
+                                    className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none bg-transparent text-gray-900"
                                     autoFocus
                                     onKeyDown={(e) => e.key === "Enter" && handleAddCustom()}
                                 />
