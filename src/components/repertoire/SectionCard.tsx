@@ -1,5 +1,5 @@
-import React from "react";
-import { ArrowUp, ArrowDown, Trash2, X, FileAudio, FileText, Music } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { ArrowUp, ArrowDown, Trash2, X, FileAudio, FileText, Music, Pencil, Check } from "lucide-react";
 import type { Section, SongItem } from "../../types/repertoire";
 import SmartSongInput from "./SmartSongInput";
 
@@ -11,6 +11,7 @@ interface SectionCardProps {
     onMoveSection: (index: number, direction: "up" | "down") => void;
     onAddSong: (sectionId: string, song: SongItem) => void;
     onRemoveSong: (sectionId: string, songId: string) => void;
+    onRenameSection: (id: string, newName: string) => void;
 }
 
 const SectionCard: React.FC<SectionCardProps> = ({
@@ -21,7 +22,47 @@ const SectionCard: React.FC<SectionCardProps> = ({
     onMoveSection,
     onAddSong,
     onRemoveSong,
+    onRenameSection,
 }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [draftName, setDraftName] = useState(section.name);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    // Auto-focus and select all text when entering edit mode
+    useEffect(() => {
+        if (isEditing && inputRef.current) {
+            inputRef.current.focus();
+            inputRef.current.select();
+        }
+    }, [isEditing]);
+
+    // Keep draft in sync if section.name changes externally (e.g. template reload)
+    useEffect(() => {
+        setDraftName(section.name);
+    }, [section.name]);
+
+    const handleStartEdit = () => {
+        setDraftName(section.name);
+        setIsEditing(true);
+    };
+
+    const handleConfirmRename = () => {
+        const trimmed = draftName.trim();
+        if (trimmed && trimmed !== section.name) {
+            onRenameSection(section.id, trimmed);
+        } else {
+            setDraftName(section.name); // revert if empty or unchanged
+        }
+        setIsEditing(false);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") handleConfirmRename();
+        if (e.key === "Escape") {
+            setDraftName(section.name);
+            setIsEditing(false);
+        }
+    };
 
     const getSongIcon = (source: SongItem["source"]) => {
         switch (source) {
@@ -29,16 +70,50 @@ const SectionCard: React.FC<SectionCardProps> = ({
             case "typed": return <FileText className="w-4 h-4 text-purple-500" />;
             default: return <Music className="w-4 h-4 text-gray-500" />;
         }
-    }
+    };
 
     return (
-        // return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 transition-all hover:shadow-md">
             <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 rounded-t-xl">
-                <h3 className="font-semibold text-lg text-gray-800">
-                    {section.name}
-                </h3>
-                <div className="flex items-center space-x-1">
+                {/* Inline editable section name */}
+                <div className="flex items-center gap-2 flex-1 min-w-0 mr-2">
+                    {isEditing ? (
+                        <>
+                            <input
+                                ref={inputRef}
+                                type="text"
+                                value={draftName}
+                                onChange={(e) => setDraftName(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                onBlur={handleConfirmRename}
+                                className="flex-1 min-w-0 text-lg font-semibold text-gray-800 border-b-2 border-red-500 bg-transparent outline-none px-0 py-0.5"
+                            />
+                            <button
+                                onMouseDown={(e) => { e.preventDefault(); handleConfirmRename(); }}
+                                className="p-1 rounded-md text-red-600 hover:bg-red-100 transition-colors shrink-0"
+                                title="Confirm rename"
+                            >
+                                <Check className="w-4 h-4" />
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <h3 className="font-semibold text-lg text-gray-800 truncate">
+                                {section.name}
+                            </h3>
+                            <button
+                                onClick={handleStartEdit}
+                                className="p-1 rounded-md text-gray-400 hover:text-red-600 hover:bg-gray-200 transition-colors shrink-0"
+                                title="Rename section"
+                            >
+                                <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                        </>
+                    )}
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex items-center space-x-1 shrink-0">
                     <button
                         onClick={() => onMoveSection(index, "up")}
                         disabled={index === 0}

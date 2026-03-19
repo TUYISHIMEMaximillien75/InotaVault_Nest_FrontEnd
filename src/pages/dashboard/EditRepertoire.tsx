@@ -101,6 +101,12 @@ const EditRepertoire: React.FC = () => {
         ));
     };
 
+    const handleRenameSection = (id: string, newName: string) => {
+        setSections(prev => prev.map(sec =>
+            sec.id === id ? { ...sec, name: newName } : sec
+        ));
+    };
+
     // ── Template reload when event type changes ──────────────────────────────
     // Only auto-load template if user actively changes event type
     const hasLoadedRef = React.useRef(false);
@@ -246,6 +252,7 @@ const EditRepertoire: React.FC = () => {
                                 onMoveSection={handleMoveSection}
                                 onAddSong={handleAddSong}
                                 onRemoveSong={handleRemoveSong}
+                                onRenameSection={handleRenameSection}
                             />
                         ))
                     )}

@@ -3,59 +3,97 @@ import { Bell, UserCircle } from "lucide-react";
 import { Outlet } from "react-router-dom";
 
 const DashboardLayout = () => {
+  const user = (() => {
+    try { return JSON.parse(localStorage.getItem("user") || "{}"); }
+    catch { return {}; }
+  })();
+
+  const name: string = user?.user?.name || user?.name || "Musician";
+  const email: string = user?.user?.email || user?.email || "";
+
   return (
-    <div className="flex min-h-screen bg-slate-50/50">
-      {/* 1. Sidebar - Fixed/Sticky via its own internal logic */}
-      <Sidebar />
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap');
+        .dl-display { font-family: 'Playfair Display', serif; }
+        .dl-body    { font-family: 'DM Sans', sans-serif; }
 
-      {/* 2. Main Content Area */}
-      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+        @keyframes dlFadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .dl-page-in { animation: dlFadeIn .35s cubic-bezier(.4,0,.2,1) both; }
+      `}</style>
 
-        {/* 3. Top Header - Professional Navbar */}
-        <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-8 sticky top-0 z-30">
-          <div className="flex items-center gap-4 flex-1">
-            {/* Search Bar - Hidden on small mobile
-            <div className="hidden md:flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-lg w-full max-w-md border border-transparent focus-within:border-red-200 focus-within:bg-white transition-all">
-              <Search size={18} className="text-gray-400" />
-              <input 
-                type="text" 
-                placeholder="Search songs, repertoires..." 
-                className="bg-transparent border-none outline-none text-sm w-full"
-              />
-            </div> */}
-          </div>
+      <div className="flex min-h-screen bg-[#f8f5f0] dl-body">
 
-          {/* Right side actions */}
-          <div className="flex items-center gap-4">
-            <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors relative">
-              <Bell size={20} />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-600 rounded-full border-2 border-white"></span>
-            </button>
-            <div className="h-8 w-[1px] bg-gray-200 mx-2 hidden sm:block"></div>
-            <div className="flex items-center gap-3 pl-2">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-semibold text-gray-900 leading-none">Admin User</p>
-                <p className="text-xs text-gray-500 mt-1">Premium Plan</p>
+        {/* ── Sidebar ── */}
+        <Sidebar />
+
+        {/* ── Main column ── */}
+        <div className="flex flex-col flex-1 min-w-0 h-screen overflow-hidden">
+
+          {/* ── Top header ── */}
+          <header className="sticky h-18 top-0 z-30 bg-[#f8f5f0] border-b border-gray-200">
+            {/* Red top rule */}
+            <div className="h-[3px] bg-red-600" />
+
+            <div className="h-14 flex items-center justify-between px-5 sm:px-8">
+
+              {/* Left: page context label */}
+              <div className="flex items-center gap-3">
+                {/* <p className="dl-display text-base font-bold text-gray-900 hidden sm:block leading-none"> */}
+                {/* InotaVault */}
+                {/* </p> */}
+                {/* <span className="hidden sm:block w-px h-4 bg-gray-300" /> */}
+                {/* <p className="dl-body text-xs font-medium text-gray-400 uppercase tracking-[.18em]"> */}
+                {/* Dashboard */}
+                {/* </p> */}
               </div>
-              <div className="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 border-2 border-white shadow-sm">
-                <UserCircle size={28} />
+
+              {/* Right: actions */}
+              <div className="flex items-center gap-2 sm:gap-3">
+
+                {/* Bell */}
+                <button
+                  className="relative w-9 h-9 flex items-center justify-center border border-transparent hover:border-gray-200 hover:bg-white text-gray-400 hover:text-red-600 transition-all"
+                  aria-label="Notifications"
+                >
+                  <Bell size={17} />
+                  {/* Notification dot */}
+                  <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-red-600 rounded-full" />
+                </button>
+
+                {/* Divider */}
+                <span className="hidden sm:block w-px h-5 bg-gray-200" />
+
+                {/* User chip */}
+                <div className="flex items-center gap-2.5">
+                  <div className="hidden sm:block text-right">
+                    <p className="dl-body text-xs font-semibold text-gray-800 leading-none">{name}</p>
+                    {email && (
+                      <p className="dl-body text-[10px] text-gray-400 mt-0.5 truncate max-w-[140px]">{email}</p>
+                    )}
+                  </div>
+                  <div className="w-8 h-8 bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-400 hover:border-red-300 hover:text-red-500 transition-colors cursor-pointer">
+                    <UserCircle size={20} />
+                  </div>
+                </div>
+
               </div>
             </div>
-          </div>
-        </header>
+          </header>
 
-        {/* 4. Page Content Wrapper */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto p-4 md:p-8 lg:p-10">
-            {/* Fade-in Animation wrapper (optional) */}
-            <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+          {/* ── Page content ── */}
+          <main className="flex-1 overflow-y-auto">
+            <div className="dl-page-in">
+              <Outlet />
             </div>
-            <Outlet />
-          </div>
-        </main>
+          </main>
 
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

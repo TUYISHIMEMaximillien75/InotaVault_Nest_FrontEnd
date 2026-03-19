@@ -71,6 +71,12 @@ const CreateRepertoire: React.FC = () => {
         }));
     };
 
+    const handleRenameSection = (id: string, newName: string) => {
+        setSections(sections.map(section =>
+            section.id === id ? { ...section, name: newName } : section
+        ));
+    };
+
     const handleSave = async () => {
         if (!repertoireTitle.trim()) {
             alert("Please enter a repertoire title.");
@@ -163,6 +169,7 @@ const CreateRepertoire: React.FC = () => {
                                 onMoveSection={handleMoveSection}
                                 onAddSong={handleAddSong}
                                 onRemoveSong={handleRemoveSong}
+                                onRenameSection={handleRenameSection}
                             />
                         ))
                     )}
