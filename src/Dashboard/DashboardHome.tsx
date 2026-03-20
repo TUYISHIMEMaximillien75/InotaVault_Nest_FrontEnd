@@ -7,7 +7,7 @@ import { NavLink } from "react-router-dom";
 import icon from "../assets/icon.png";
 
 import {
-  Music2, BookOpen, Upload, Plus, ArrowRight, Loader2,
+  Music2, BookOpen, Upload, Plus, ArrowRight,
   MicVocal, Layers, Tag, ExternalLink, Clock, Heart,
   Eye, MessageCircle, TrendingUp, Film, Headphones, FileMusic,
 } from "lucide-react";

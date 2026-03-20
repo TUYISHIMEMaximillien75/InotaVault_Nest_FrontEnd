@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Music, Video, ShieldCheck, Layers, ChevronRight, PlayCircle, BookOpen, Youtube, ChevronLeft, ArrowUpRight } from "lucide-react";
 import logo from "../assets/icon.png";
@@ -25,11 +25,9 @@ const ARTISTS = [
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [prevSlide, setPrevSlide] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const goToSlide = (idx: number) => {
-    setPrevSlide(currentSlide);
     setCurrentSlide(idx);
   };
 
@@ -39,7 +37,6 @@ export default function Home() {
 
   useEffect(() => {
     const t = setInterval(() => {
-      setPrevSlide(currentSlide);
       setCurrentSlide((p) => (p + 1) % SLIDESHOW_IMAGES.length);
     }, 5500);
     return () => clearInterval(t);

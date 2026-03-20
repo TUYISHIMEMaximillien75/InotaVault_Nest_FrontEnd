@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Music, UploadCloud, Library,
   User, LogOut, Menu, X, Search,
 } from "lucide-react";
-import icon from "../assets/icon.png";
+
 import logo from "../assets/logo.png";
 
 const NAV_ITEMS = [
