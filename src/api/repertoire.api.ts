@@ -38,4 +38,4 @@ export const deleteRepertoire = (id: string) =>
 
 /** Public endpoint — no auth token needed, used for shared links */
 export const getRepertoirePublic = (id: string) =>
-    axios.get(`http://localhost:3000/repertoire/public/${id}`);
+    axios.get(`https://backend-inotavault.vercel.app/repertoire/public/${id}`);
