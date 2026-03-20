@@ -2,7 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   // baseURL: "https://backendinotavault-production.up.railway.app/"
-  baseURL: "http://localhost:3000",
+  baseURL: "https://backend-inotavault.vercel.app/",
 });
 
 api.interceptors.request.use((config) => {
