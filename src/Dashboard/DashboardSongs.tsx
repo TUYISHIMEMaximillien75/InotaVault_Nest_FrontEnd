@@ -1,7 +1,6 @@
-import { Plus, Pencil, Music, Search, ChevronLeft, ChevronRight, Film, Headphones, FileMusic, MoreVertical } from "lucide-react";
+import { Plus, Pencil, Music, Search, ChevronLeft, ChevronRight, Film, Headphones, FileMusic, Trash2 } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { getSongByUploaderId } from "../api/song.api";
-import { searchInSong } from "../api/song.api";
+import { getSongByUploaderId, searchInSong, deleteSong } from "../api/song.api";
 import { getProfile } from "../api/auth.api";
 import { useState, useEffect } from "react";
 import icon from "../assets/icon.png";
@@ -62,6 +61,23 @@ export default function DashboardSongs() {
 
   const fmtDate = (d: string) =>
     new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+
+  const handleDelete = async (id: string, name: string) => {
+    if (window.confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
+      try {
+        await deleteSong(id);
+        const userRes = await getProfile();
+        const userId = userRes.data?.id;
+        if (userId) {
+          const songsRes = await getSongByUploaderId(userId);
+          setSongs(songsRes.data);
+        }
+      } catch (err) {
+        console.error("Failed to delete song", err);
+        alert("Failed to delete the song. Please try again.");
+      }
+    }
+  };
 
   const mediaIcons = (song: any) => (
     <div className="flex items-center gap-1.5">
@@ -214,10 +230,11 @@ export default function DashboardSongs() {
                             <Pencil size={14} />
                           </NavLink>
                           <button
-                            className="w-8 h-8 flex items-center justify-center border border-transparent text-gray-400 hover:border-gray-200 hover:text-gray-700 hover:bg-gray-50 transition-all"
-                            title="More"
+                            onClick={() => handleDelete(song.id, song.name)}
+                            className="w-8 h-8 flex items-center justify-center border border-transparent text-gray-400 hover:border-red-200 hover:text-red-700 hover:bg-red-50 transition-all"
+                            title="Delete"
                           >
-                            <MoreVertical size={14} />
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </td>

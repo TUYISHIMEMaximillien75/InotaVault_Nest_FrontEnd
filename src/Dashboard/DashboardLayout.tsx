@@ -1,5 +1,6 @@
 import Sidebar from "./Sidebar";
-import { Bell, UserCircle } from "lucide-react";
+import { UserCircle } from "lucide-react";
+import NotificationsDropdown from "./NotificationsDropdown";
 import { Outlet } from "react-router-dom";
 
 const DashboardLayout = () => {
@@ -54,15 +55,8 @@ const DashboardLayout = () => {
               {/* Right: actions */}
               <div className="flex items-center gap-2 sm:gap-3">
 
-                {/* Bell */}
-                <button
-                  className="relative w-9 h-9 flex items-center justify-center border border-transparent hover:border-gray-200 hover:bg-white text-gray-400 hover:text-red-600 transition-all"
-                  aria-label="Notifications"
-                >
-                  <Bell size={17} />
-                  {/* Notification dot */}
-                  <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-red-600 rounded-full" />
-                </button>
+                {/* Notifications Dropdown */}
+                <NotificationsDropdown />
 
                 {/* Divider */}
                 <span className="hidden sm:block w-px h-5 bg-gray-200" />

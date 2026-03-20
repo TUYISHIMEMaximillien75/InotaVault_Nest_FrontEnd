@@ -23,8 +23,15 @@ export default function Register() {
 
     try {
       setLoading(true);
-      await api.post("/auth/register", { name, email, password });
-      setSuccess("Account created! Check your email for a verification link.");
+      const res = await api.post("/auth/register", { name, email, password });
+      
+      // Auto-login the user since the backend returns the token
+      if (res.data?.user?.token) {
+        localStorage.setItem("token", res.data.user.token);
+        localStorage.setItem("user", JSON.stringify(res.data));
+      }
+      
+      setSuccess(`Welcome to InotaVault, ${res.data?.user?.name || name}!`);
     } catch (err: any) {
       setError(err?.response?.data?.message || "Registration failed. Please try again.");
     } finally {
@@ -102,15 +109,26 @@ export default function Register() {
                   <CheckCircle2 size={28} className="text-green-500" />
                 </div>
                 <div>
-                  <h2 className="rg-display text-2xl font-black text-gray-900 mb-2">You're in.</h2>
-                  <p className="text-sm text-gray-500 leading-relaxed max-w-xs">{success}</p>
+                  <h2 className="rg-display text-2xl font-black text-gray-900 mb-2">Account created!</h2>
+                  <p className="text-sm text-gray-500 leading-relaxed max-w-xs">
+                    You've successfully registered with <strong>{email}</strong>.<br />
+                    You are now logged in.
+                  </p>
                 </div>
-                <Link
-                  to="/login"
-                  className="mt-2 flex items-center gap-2 px-7 py-3 bg-gray-950 text-white text-sm font-semibold uppercase tracking-wider hover:bg-red-700 transition-colors duration-200"
-                >
-                  Go to Login <ArrowRight size={15} />
-                </Link>
+                <div className="flex flex-col gap-3 w-full mt-2">
+                  <Link
+                    to="/dashboard"
+                    className="w-full flex items-center justify-center gap-2 px-7 py-3 bg-gray-950 text-white text-sm font-semibold uppercase tracking-wider hover:bg-red-700 transition-colors duration-200"
+                  >
+                    Continue to Dashboard <ArrowRight size={15} />
+                  </Link>
+                  <Link
+                    to="/songs"
+                    className="w-full flex items-center justify-center gap-2 px-7 py-3 bg-red-50 text-red-700 border border-red-100 text-sm font-semibold uppercase tracking-wider hover:bg-red-100 transition-colors duration-200"
+                  >
+                    Explore Songs
+                  </Link>
+                </div>
               </div>
             </div>
           ) : (

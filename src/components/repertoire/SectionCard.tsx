@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { ArrowUp, ArrowDown, Trash2, X, FileAudio, FileText, Music, Pencil, Check } from "lucide-react";
+import { ArrowUp, ArrowDown, Trash2, X, FileAudio, FileText, Music, Pencil, Check, Loader2, AlertCircle } from "lucide-react";
 import type { Section, SongItem } from "../../types/repertoire";
 import SmartSongInput from "./SmartSongInput";
 
@@ -10,6 +10,7 @@ interface SectionCardProps {
     onRemoveSection: (id: string) => void;
     onMoveSection: (index: number, direction: "up" | "down") => void;
     onAddSong: (sectionId: string, song: SongItem) => void;
+    onUpdateSong: (sectionId: string, songId: string, updates: Partial<SongItem>) => void;
     onRemoveSong: (sectionId: string, songId: string) => void;
     onRenameSection: (id: string, newName: string) => void;
 }
@@ -21,6 +22,7 @@ const SectionCard: React.FC<SectionCardProps> = ({
     onRemoveSection,
     onMoveSection,
     onAddSong,
+    onUpdateSong,
     onRemoveSong,
     onRenameSection,
 }) => {
@@ -28,7 +30,6 @@ const SectionCard: React.FC<SectionCardProps> = ({
     const [draftName, setDraftName] = useState(section.name);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Auto-focus and select all text when entering edit mode
     useEffect(() => {
         if (isEditing && inputRef.current) {
             inputRef.current.focus();
@@ -36,7 +37,6 @@ const SectionCard: React.FC<SectionCardProps> = ({
         }
     }, [isEditing]);
 
-    // Keep draft in sync if section.name changes externally (e.g. template reload)
     useEffect(() => {
         setDraftName(section.name);
     }, [section.name]);
@@ -51,7 +51,7 @@ const SectionCard: React.FC<SectionCardProps> = ({
         if (trimmed && trimmed !== section.name) {
             onRenameSection(section.id, trimmed);
         } else {
-            setDraftName(section.name); // revert if empty or unchanged
+            setDraftName(section.name);
         }
         setIsEditing(false);
     };
@@ -64,8 +64,10 @@ const SectionCard: React.FC<SectionCardProps> = ({
         }
     };
 
-    const getSongIcon = (source: SongItem["source"]) => {
-        switch (source) {
+    const getSongIcon = (song: SongItem) => {
+        if (song.uploading) return <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />;
+        if (song.uploadError) return <AlertCircle className="w-4 h-4 text-red-500" />;
+        switch (song.source) {
             case "uploaded": return <FileAudio className="w-4 h-4 text-blue-500" />;
             case "typed": return <FileText className="w-4 h-4 text-purple-500" />;
             default: return <Music className="w-4 h-4 text-gray-500" />;
@@ -148,22 +150,37 @@ const SectionCard: React.FC<SectionCardProps> = ({
                         {section.songs.map((song) => (
                             <li
                                 key={song.id}
-                                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 group hover:border-red-200 transition-all"
+                                className={`flex items-center justify-between p-3 rounded-lg border group hover:border-red-200 transition-all ${
+                                    song.uploadError
+                                        ? "bg-red-50 border-red-200"
+                                        : song.uploading
+                                        ? "bg-blue-50 border-blue-200"
+                                        : "bg-gray-50 border-gray-100"
+                                }`}
                             >
                                 <div className="flex items-center space-x-3">
                                     <div className="p-2 bg-white rounded-full shadow-sm">
-                                        {getSongIcon(song.source)}
+                                        {getSongIcon(song)}
                                     </div>
-                                    <span className="text-sm font-medium text-gray-700">
-                                        {song.title}
-                                    </span>
-                                    {song.source === "uploaded" && (
-                                        <span className="text-[10px] px-1.5 py-0.5 bg-red-100 text-red-700 rounded-full">FILE</span>
+                                    <div>
+                                        <span className="text-sm font-medium text-gray-700">
+                                            {song.title}
+                                        </span>
+                                        {song.uploading && (
+                                            <p className="text-xs text-blue-500">Uploading Into Your <span className="text-black font-bold">Vault</span> <span className="text-2xl text-red-600">. . .</span></p>
+                                        )}
+                                        {song.uploadError && (
+                                            <p className="text-xs text-red-500">Upload failed — please remove and try again</p>
+                                        )}
+                                    </div>
+                                    {song.source === "uploaded" && !song.uploading && !song.uploadError && (
+                                        <span className="text-[10px] px-1.5 py-0.5 bg-red-100 text-red-700 rounded-full">PDF</span>
                                     )}
                                 </div>
                                 <button
                                     onClick={() => onRemoveSong(section.id, song.id!)}
                                     className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                                    disabled={song.uploading}
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
@@ -173,10 +190,16 @@ const SectionCard: React.FC<SectionCardProps> = ({
                 )}
 
                 {/* Input */}
-                <SmartSongInput onAddSong={(song) => onAddSong(section.id, song)} category={section.name} />
+                <SmartSongInput
+                    onAddSong={(song) => onAddSong(section.id, song)}
+                    onUpdateSong={(tempId, updates) => onUpdateSong(section.id, tempId, updates)}
+                    category={section.name}
+                />
             </div>
         </div>
     );
 };
 
 export default SectionCard;
+
+

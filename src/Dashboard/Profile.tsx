@@ -9,9 +9,10 @@ export default function Profile() {
   // Login stores { message, user: { id, name, token } } — so read .user.name
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
   const initialName = storedUser?.user?.name || storedUser?.name || "";
+  const initialEmail = storedUser?.user?.email || storedUser?.email || "";
 
   const [name, setName] = useState(initialName);
-  const [email, setEmail] = useState("");   // email is not in localStorage — must fetch
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -75,7 +76,7 @@ export default function Profile() {
       const stored = JSON.parse(localStorage.getItem("user") || "{}");
       const updatedStored = {
         ...stored,
-        user: { ...(stored.user || {}), name }
+        user: { ...(stored.user || {}), name, email }
       };
       localStorage.setItem("user", JSON.stringify(updatedStored));
 

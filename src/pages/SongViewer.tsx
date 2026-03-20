@@ -66,8 +66,7 @@ export default function SongView() {
     try {
       await api.post('/song-interactions', {
         action: "view",
-        song_id: id,
-        user_id: localStorage.getItem("user_id")
+        song_id: id
       });
     } catch (error) { console.log(error); }
   };

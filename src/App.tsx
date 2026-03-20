@@ -15,6 +15,7 @@ import DashboardSongs from "./Dashboard/DashboardSongs";
 import DashboardReperitories from "./Dashboard/DashboardReperitories";
 import CreateRepertoire from "./pages/dashboard/CreateRepertoire";
 import EditRepertoire from "./pages/dashboard/EditRepertoire";
+import EditSong from "./pages/dashboard/EditSong";
 import RepertoireViewer from "./pages/RepertoireViewer";
 import NotFound from "./pages/NotFound";
 import Profile from "./Dashboard/Profile";
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="/dashboard/repertoires" element={<DashboardReperitories />}></Route>
           <Route path="/dashboard/create_repertoires" element={<CreateRepertoire />}></Route>
           <Route path="/dashboard/edit_repertoire/:id" element={<EditRepertoire />}></Route>
+          <Route path="/dashboard/edit_song/:id" element={<EditSong />}></Route>
           <Route path="/dashboard/profile" element={<Profile />}></Route>
           <Route path="*" element={<NotFound />} />
         </Route>

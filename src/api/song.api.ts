@@ -4,10 +4,21 @@ export const getAllSongs = () =>
   api.get("/allsongs");
 
 export const getSongById = (id: string) =>
-  api.get(`/songs/${id}`);
+  api.get(`/songs/song/${id}`);
 
 export const uploadSong = (data: FormData) => {
   return api.post("/songs/upload", data);
+};
+
+/**
+ * Used inside the repertoire builder to upload a PDF sheet.
+ * Creates a minimal Song record (upload_source = 'repertoire') visible in /dashboard/songs.
+ */
+export const uploadSongForRepertoire = (name: string, pdfFile: File) => {
+  const form = new FormData();
+  form.append("name", name);
+  form.append("pdf_sheet", pdfFile);
+  return api.post<{ id: string; pdf_sheet: string; name: string }>("/songs/upload-for-repertoire", form);
 };
 
 export const getAllCategories = () =>
@@ -30,7 +41,7 @@ export const getSongByUploaderId = async (uploaderId: string) =>{
 }
 
 export const updateSong = (id: string, data: any) =>
-  api.put(`/songs/${id}`, data);
+  api.patch(`/songs/song/${id}`, data);
 
 export const deleteSong = (id: string) =>
-  api.delete(`/deletesongs/${id}`);
+  api.delete(`/songs/${id}`);
