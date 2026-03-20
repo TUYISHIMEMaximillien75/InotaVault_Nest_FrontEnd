@@ -49,7 +49,7 @@ export default function App() {
         <Route path="/repertoire/:id" element={<RepertoireViewer />} />
  
         {/* Dashboard routes */}
-        <Route path="/dashboard" element={<DashboardLayout />}>
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
           <Route index element={<DashboardHome />}></Route>
           <Route path="/dashboard/songs" element={<DashboardSongs />}></Route>
           <Route path="/dashboard/upload" element={<UploadSong />}></Route>
