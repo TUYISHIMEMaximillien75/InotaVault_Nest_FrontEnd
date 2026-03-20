@@ -1,14 +1,15 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Search, Upload, Type, Music, Loader2 } from "lucide-react";
 import type { SongItem } from "../../types/repertoire";
-import { searchSongInCategory } from "../../api/song.api";
+import { searchSongInCategory, uploadSongForRepertoire } from "../../api/song.api";
 
 interface SmartSongInputProps {
     onAddSong: (song: SongItem) => void;
+    onUpdateSong?: (id: string, updates: Partial<SongItem>) => void;
     category: string;
 }
 
-const SmartSongInput: React.FC<SmartSongInputProps> = ({ onAddSong, category }) => {
+const SmartSongInput: React.FC<SmartSongInputProps> = ({ onAddSong, onUpdateSong, category }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -46,11 +47,8 @@ const SmartSongInput: React.FC<SmartSongInputProps> = ({ onAddSong, category }) 
         const delayDebounce = setTimeout(async () => {
             setLoading(true);
             try {
-                // get section name real section name
-
                 const res = await searchSongInCategory(searchTerm, category);
                 setSearchResults(res.data);
-                console.log("search results", res.data);
             } catch (err) {
                 console.error("Failed to search songs", err);
             } finally {
@@ -61,19 +59,39 @@ const SmartSongInput: React.FC<SmartSongInputProps> = ({ onAddSong, category }) 
         return () => clearTimeout(delayDebounce);
     }, [searchTerm]);
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            onAddSong({
-                id: crypto.randomUUID(),
-                title: file.name,
-                source: "uploaded",
-                uri: URL.createObjectURL(file), // Helper for preview if needed
-            });
-            setIsOpen(false);
-            setSearchTerm("");
+        if (!file) return;
+        // Reset so same file can be re-selected after an error
+        e.target.value = "";
+
+        const displayName = file.name.replace(/\.[^/.]+$/, "");
+
+        // Add a loading placeholder immediately
+        const tempId = crypto.randomUUID();
+        onAddSong({
+            id: tempId,
+            title: displayName,
+            source: "uploaded",
+            uploading: true,
+        });
+        setIsOpen(false);
+        setSearchTerm("");
+
+        try {
+            const res = await uploadSongForRepertoire(displayName, file);
+            const { id: song_id, pdf_sheet } = res.data;
+            if (onUpdateSong) {
+                onUpdateSong(tempId, { song_id, uri: pdf_sheet, uploading: false });
+            }
+        } catch (err) {
+            console.error("Failed to upload PDF to Cloudinary", err);
+            if (onUpdateSong) {
+                onUpdateSong(tempId, { uploading: false, uploadError: true });
+            }
         }
     };
+
 
     const handleManualEntry = () => {
         if (searchTerm.trim()) {
@@ -129,13 +147,13 @@ const SmartSongInput: React.FC<SmartSongInputProps> = ({ onAddSong, category }) 
                             className="flex items-center justify-center space-x-2 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-md transition-colors text-sm font-medium"
                         >
                             <Upload className="w-4 h-4" />
-                            <span>Upload File</span>
+                            <span>Upload PDF</span>
                         </button>
                         <input
                             type="file"
                             ref={fileInputRef}
                             className="hidden"
-                            accept="audio/*,application/pdf"
+                            accept="application/pdf"
                             onChange={handleFileUpload}
                         />
 

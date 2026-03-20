@@ -7,3 +7,6 @@ export const getComments = (song_id:string) =>{
 export const postComments = (song_id:string,comment:string) =>{
     return api.post(`/comments`,{song_id,comment})
 }
+
+export const getTotalCommentsByUploader = (songIds: string[]) =>
+    api.get(`/comments/totalByUploader?song_ids=${songIds.join(',')}`);

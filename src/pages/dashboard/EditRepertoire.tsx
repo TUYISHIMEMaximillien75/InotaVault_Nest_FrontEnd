@@ -11,6 +11,7 @@ import { getRepertoireById, updateRepertoire } from "../../api/repertoire.api";
 function mapApiSong(s: any): SongItem {
     return {
         id: s.id,
+        song_id: s.song_id ?? undefined,
         title: s.title,
         source: s.source,
         uri: s.file_uri ?? undefined,
@@ -101,6 +102,19 @@ const EditRepertoire: React.FC = () => {
         ));
     };
 
+    const handleUpdateSong = (sectionId: string, songId: string, updates: Partial<SongItem>) => {
+        setSections(prev => prev.map(sec => {
+            if (sec.id !== sectionId) return sec;
+            return { ...sec, songs: sec.songs.map(s => s.id === songId ? { ...s, ...updates } : s) };
+        }));
+    };
+
+    const handleRenameSection = (id: string, newName: string) => {
+        setSections(prev => prev.map(sec =>
+            sec.id === id ? { ...sec, name: newName } : sec
+        ));
+    };
+
     // ── Template reload when event type changes ──────────────────────────────
     // Only auto-load template if user actively changes event type
     const hasLoadedRef = React.useRef(false);
@@ -136,7 +150,7 @@ const EditRepertoire: React.FC = () => {
                     name: section.name,
                     position: i,
                     songs: section.songs.map((song, j) => ({
-                        song_id: song.source === "existing" ? song.id : undefined,
+                        song_id: song.source === "existing" ? song.id : (song.source === "uploaded" ? song.song_id : undefined),
                         title: song.title,
                         source: song.source,
                         file_uri: song.uri ?? undefined,
@@ -245,7 +259,9 @@ const EditRepertoire: React.FC = () => {
                                 onRemoveSection={handleRemoveSection}
                                 onMoveSection={handleMoveSection}
                                 onAddSong={handleAddSong}
+                                onUpdateSong={handleUpdateSong}
                                 onRemoveSong={handleRemoveSong}
+                                onRenameSection={handleRenameSection}
                             />
                         ))
                     )}

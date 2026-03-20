@@ -1,4 +1,5 @@
 import api from "./axios";
+import axios from "axios";
 
 export interface RepertoireSongPayload {
     song_id?: string;
@@ -34,3 +35,7 @@ export const getRepertoireById = (id: string) =>
 
 export const deleteRepertoire = (id: string) =>
     api.delete(`/repertoire/${id}`);
+
+/** Public endpoint — no auth token needed, used for shared links */
+export const getRepertoirePublic = (id: string) =>
+    axios.get(`http://localhost:3000/repertoire/public/${id}`);

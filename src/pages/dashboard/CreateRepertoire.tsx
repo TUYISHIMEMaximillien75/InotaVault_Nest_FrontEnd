@@ -5,8 +5,10 @@ import SectionCard from "../../components/repertoire/SectionCard";
 import { HolyMassTemplate } from "../../components/repertoire/HolyMassTemplate";
 import type { EventType, Section, SongItem } from "../../types/repertoire";
 import { createRepertoire } from "../../api/repertoire.api";
+import { useNavigate } from "react-router-dom";
 
 const CreateRepertoire: React.FC = () => {
+    const navigate = useNavigate();
     const [eventType, setEventType] = useState<EventType | "">("");
     const [sections, setSections] = useState<Section[]>([]);
     const [repertoireTitle, setRepertoireTitle] = useState("");
@@ -71,6 +73,22 @@ const CreateRepertoire: React.FC = () => {
         }));
     };
 
+    const handleUpdateSong = (sectionId: string, songId: string, updates: Partial<SongItem>) => {
+        setSections(prev => prev.map(section => {
+            if (section.id !== sectionId) return section;
+            return {
+                ...section,
+                songs: section.songs.map(s => s.id === songId ? { ...s, ...updates } : s),
+            };
+        }));
+    };
+
+    const handleRenameSection = (id: string, newName: string) => {
+        setSections(sections.map(section =>
+            section.id === id ? { ...section, name: newName } : section
+        ));
+    };
+
     const handleSave = async () => {
         if (!repertoireTitle.trim()) {
             alert("Please enter a repertoire title.");
@@ -89,7 +107,7 @@ const CreateRepertoire: React.FC = () => {
                     name: section.name,
                     position: i,
                     songs: section.songs.map((song, j) => ({
-                        song_id: song.source === "existing" ? song.id : undefined,
+                        song_id: song.source === "existing" ? song.id : (song.source === "uploaded" ? song.song_id : undefined),
                         title: song.title,
                         source: song.source,
                         file_uri: song.uri ?? undefined,
@@ -97,7 +115,8 @@ const CreateRepertoire: React.FC = () => {
                     })),
                 })),
             });
-            alert("Repertoire saved successfully!");
+            // alert("Repertoire saved successfully!");
+            navigate("/dashboard/repertoires");
         } catch (err) {
             console.error("Failed to save repertoire", err);
             alert("Failed to save. Please try again.");
@@ -162,7 +181,9 @@ const CreateRepertoire: React.FC = () => {
                                 onRemoveSection={handleRemoveSection}
                                 onMoveSection={handleMoveSection}
                                 onAddSong={handleAddSong}
+                                onUpdateSong={handleUpdateSong}
                                 onRemoveSong={handleRemoveSong}
+                                onRenameSection={handleRenameSection}
                             />
                         ))
                     )}
