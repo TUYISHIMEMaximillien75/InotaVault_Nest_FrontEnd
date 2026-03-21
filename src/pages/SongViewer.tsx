@@ -66,7 +66,8 @@ export default function SongView() {
     try {
       await api.post('/song-interactions', {
         action: "view",
-        song_id: id
+        song_id: id,
+        user_id: localStorage.getItem("user_id")
       });
     } catch (error) { console.log(error); }
   };
@@ -165,11 +166,14 @@ export default function SongView() {
           color: #fff;
         }
         .tab-inactive {
-          color: rgba(255,255,255,.45);
+          background: rgba(255,255,255,.10);
+          color: rgba(255,255,255,.85);
+          border: 1px solid rgba(255,255,255,.15);
         }
         .tab-inactive:hover {
-          color: rgba(255,255,255,.8);
-          background: rgba(255,255,255,.06);
+          background: rgba(255,255,255,.18);
+          color: #fff;
+          border-color: rgba(255,255,255,.3);
         }
         .related-card:hover .related-title { color: #dc2626; }
         .action-btn {
@@ -255,7 +259,7 @@ export default function SongView() {
                     {(song.video_file || song.external_link) && (
                       <button
                         onClick={() => setActiveTab("video")}
-                        className={`flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider transition-all rounded-t-sm ${activeTab === "video" ? "tab-active" : "tab-inactive"}`}
+                        className={`flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider transition-all ${activeTab === "video" ? "tab-active" : "tab-inactive"}`}
                       >
                         <Film size={12} /> Video
                       </button>
@@ -263,7 +267,7 @@ export default function SongView() {
                     {song.pdf_sheet && (
                       <button
                         onClick={() => setActiveTab("pdf")}
-                        className={`flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider transition-all rounded-t-sm ${activeTab === "pdf" ? "tab-active" : "tab-inactive"}`}
+                        className={`flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider transition-all ${activeTab === "pdf" ? "tab-active" : "tab-inactive"}`}
                       >
                         <Music size={12} /> Sheet
                       </button>
@@ -271,7 +275,7 @@ export default function SongView() {
                     {song.audio_file && (
                       <button
                         onClick={() => setActiveTab("audio")}
-                        className={`flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider transition-all rounded-t-sm ${activeTab === "audio" ? "tab-active" : "tab-inactive"}`}
+                        className={`flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider transition-all ${activeTab === "audio" ? "tab-active" : "tab-inactive"}`}
                       >
                         <Headphones size={12} /> Audio
                       </button>
