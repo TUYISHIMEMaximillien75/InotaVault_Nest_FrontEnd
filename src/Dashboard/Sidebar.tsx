@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import {
   LayoutDashboard, Music, UploadCloud, Library,
-  User, LogOut, Menu, X, Search,
+  User, LogOut, Menu, X, Search, ShieldAlert,
 } from "lucide-react";
 
 import logo from "../assets/logo.png";
@@ -19,6 +19,12 @@ const NAV_ITEMS = [
 const Sidebar = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+
+  // Read user role from localStorage (set at login)
+  const storedUser = localStorage.getItem('user');
+  const parsed = storedUser ? JSON.parse(storedUser) : null;
+  // Login stores res.data → { message, user: { id, name, email, role, token } }
+  const userRole: string = parsed?.user?.role ?? parsed?.role ?? '';
 
   const logout = () => {
     ["token","user","search_bar","filter"].forEach(k => localStorage.removeItem(k));
@@ -142,12 +148,29 @@ const Sidebar = () => {
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
                 `sb2-link ${isActive ? "active" : ""}`
-              }
+            }
             >
               <item.icon size={16} className="sb2-icon shrink-0" />
               <span>{item.name}</span>
             </NavLink>
           ))}
+
+          {/* Admin-only link */}
+          {userRole === 'ADMIN' && (
+            <>
+              <div className="px-5 pt-5 pb-2">
+                <p className="text-[10px] font-bold text-red-500/60 uppercase tracking-[.22em]">Admin</p>
+              </div>
+              <NavLink
+                to="/dashboard/admin"
+                onClick={() => setOpen(false)}
+                className={({ isActive }) => `sb2-link ${isActive ? 'active' : ''}`}
+              >
+                <ShieldAlert size={16} className="sb2-icon shrink-0" />
+                <span>Admin Panel</span>
+              </NavLink>
+            </>
+          )}
         </nav>
 
         {/* Divider + user section */}

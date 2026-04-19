@@ -18,7 +18,7 @@ export default function UploadSong() {
   const [isNewCategory, setIsNewCategory] = useState(false);
 
   const [form, setForm] = useState({
-    name: "", album: "", artist: "", category: "",
+    name: "", album: "Uknown", artist: "", category: "",
     description: "", external_link: "", releaseDate: "",
   });
 

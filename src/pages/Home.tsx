@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Music, Video, ShieldCheck, Layers, ChevronRight, PlayCircle, BookOpen, Youtube, ChevronLeft, ArrowUpRight } from "lucide-react";
 import logo from "../assets/icon.png";
+import { getHomeContent } from "../api/admin.api";
 
-const SLIDESHOW_IMAGES = [
+// ── Fallback defaults (used until API responds / if it fails) ──────────────
+const DEFAULT_SLIDESHOW = [
   "/slideshow pictures/AFRI IMAGE(10).jpg",
   "/slideshow pictures/AFRI IMAGES(204).jpg",
   "/slideshow pictures/AFRI IMAGES(27).jpg",
@@ -14,18 +16,48 @@ const SLIDESHOW_IMAGES = [
   "/slideshow pictures/AFRI IMAGES(58).jpg",
 ];
 
-const ARTISTS = [
+const DEFAULT_ARTISTS = [
   { name: "Denys NYITURIKI", image: "/Artists/Denys NYITURIKI.jpg", choir: "Chorale st Paul KICUKIRO", songs: ["Yezu mwiza, Yezu nshuti yanjye", "Kwibuka by Rodrigue"], youtube: "https://www.youtube.com/@DenysNyituriki" },
-  { name: "GACANIZI Bernabe", image: "/Artists/GACANIZI Bernabe ISHIMWE.jpg", choir: "Chorale le Bon Berger Kigali", songs: ["Kyrie", ], youtube: "https://www.youtube.com/@Gibarna" },
+  { name: "GACANIZI Bernabe", image: "/Artists/GACANIZI Bernabe ISHIMWE.jpg", choir: "Chorale le Bon Berger Kigali", songs: ["Kyrie"], youtube: "https://www.youtube.com/@Gibarna" },
   { name: "Maximillien TUYISHIME", image: "/Artists/Maximillien TUYISHIME.jpg", choir: "Chorale Le Bon Berger RAMBURA", songs: ["Ntama zanjye", "Les amis de la croix"], youtube: "https://www.youtube.com/@choralelebonbergerrambura9023" },
   { name: "Oreste NIYONZIMA", image: "/Artists/Oreste NIYONZIMA.jpg", choir: "Chorale Christus Regnat", songs: ["Nyakira Ndaje", "Gloria (Imana nisingizwe mu Ijuru)"], youtube: "https://www.youtube.com/@niyonzimaoreste2436" },
   { name: "Pacifiques TUNEZERWE", image: "/Artists/Pacifiques TUNEZERWE.jpg", choir: "Chorale de Kigali", songs: ["Umukiza yatuvukiye", "Kuko ari igihangage"], youtube: "https://www.youtube.com/@tunezerwepacifique7906" },
   { name: "Sadiki Banicet", image: "/Artists/Sadiki B anicet.jpg", choir: "Chorale de Kigali", songs: ["Uhoraho yambiye ijambo", "Urukundo ni ubuzima"], youtube: "https://www.youtube.com/@sadikib" },
 ];
 
+const DEFAULT_STATS = [
+  { n: "2+", label: "Choral Communities" },
+  { n: "100+", label: "Music Sheets" },
+  { n: "6+", label: "Featured Artists" },
+  { n: "∞", label: "Possibilities" },
+];
+
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const [slideshowImages, setSlideshowImages] = useState<string[]>(DEFAULT_SLIDESHOW);
+  const [artists, setArtists] = useState(DEFAULT_ARTISTS);
+  const [homeStats, setHomeStats] = useState(DEFAULT_STATS);
+
+  useEffect(() => {
+    getHomeContent()
+      .then((r: any) => {
+        if (r.data.slideshowImages?.length) setSlideshowImages(r.data.slideshowImages);
+        if (r.data.artists?.length)         setArtists(r.data.artists);
+        if (r.data.liveStats) {
+          setHomeStats([
+            { n: `${r.data.liveStats.users}+`, label: "Choral Communities" },
+            { n: `${r.data.liveStats.songs}+`, label: "Music Sheets" },
+            { n: `${r.data.artists?.length || r.data.liveStats.categories}+`, label: "Featured Artists" },
+            { n: "∞", label: "Possibilities" },
+          ]);
+        }
+      })
+      .catch(() => { /* keep defaults silently */ });
+  }, []);
+
+
 
   const goToSlide = (idx: number) => {
     setCurrentSlide(idx);
@@ -37,10 +69,10 @@ export default function Home() {
 
   useEffect(() => {
     const t = setInterval(() => {
-      setCurrentSlide((p) => (p + 1) % SLIDESHOW_IMAGES.length);
+      setCurrentSlide((p) => (p + 1) % slideshowImages.length);
     }, 5500);
     return () => clearInterval(t);
-  }, [currentSlide]);
+  }, [currentSlide, slideshowImages.length]);
 
   return (
     <>
@@ -111,7 +143,7 @@ export default function Home() {
         {/* ═══════════════════════════════ HERO ═══════════════════════════════ */}
         <section className="relative h-screen min-h-[640px] flex flex-col items-center justify-center overflow-hidden diagonal-divider grain-overlay">
           {/* Slideshow */}
-          {SLIDESHOW_IMAGES.map((img, i) => (
+          {slideshowImages.map((img: string, i: number) => (
             <div
               key={img}
               className={`absolute inset-0 transition-opacity duration-1000 ${i === currentSlide ? "opacity-100 z-0 slide-in" : "opacity-0 -z-10"}`}
@@ -166,7 +198,7 @@ export default function Home() {
 
           {/* Slide indicators */}
           <div className="absolute bottom-10 left-0 right-0 z-20 flex justify-center gap-2">
-            {SLIDESHOW_IMAGES.map((_, idx) => (
+            {slideshowImages.map((_: string, idx: number) => (
               <button key={idx} onClick={() => goToSlide(idx)}
                 className={`transition-all duration-500 rounded-full ${idx === currentSlide ? "w-8 h-2 bg-red-500" : "w-2 h-2 bg-white/40 hover:bg-white/70"}`}
                 aria-label={`Slide ${idx+1}`} />
@@ -270,7 +302,7 @@ export default function Home() {
             {/* Horizontal scroll */}
             <div ref={scrollRef}
               className="flex gap-6 overflow-x-auto pb-6 hide-scrollbar snap-x snap-mandatory">
-              {ARTISTS.map((artist, idx) => (
+              {artists.map((artist: { name: string; image: string; choir: string; songs: string[]; youtube: string }, idx: number) => (
                 <div key={idx}
                   className="card-hover min-w-[82vw] sm:min-w-[320px] lg:min-w-[300px] shrink-0 snap-center bg-white rounded-none overflow-hidden shadow-sm group flex flex-col border border-gray-100">
 
@@ -294,7 +326,7 @@ export default function Home() {
                   <div className="p-6 flex flex-col flex-1">
                     <p className="text-[10px] font-semibold tracking-[.18em] text-gray-400 uppercase mb-3">Songs</p>
                     <ul className="space-y-2 mb-6 flex-1">
-                      {artist.songs.map((s, si) => (
+                      {artist.songs.map((s: string, si: number) => (
                         <li key={si} className="flex items-center gap-2.5 font-body text-sm text-gray-700">
                           <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />{s}
                         </li>
@@ -315,12 +347,7 @@ export default function Home() {
         {/* ═══════════════════════════════ STATS STRIP ═══════════════════════════════ */}
         <section className="bg-red-600 py-14 px-6">
           <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
-            {[
-              { n:"2+", label:"Choral Communities" },
-              { n:"100+", label:"Music Sheets" },
-              { n:"6+", label:"Featured Artists" },
-              { n:"∞", label:"Possibilities" },
-            ].map(({ n, label }) => (
+            {homeStats.map(({ n, label }: { n: string; label: string }) => (
               <div key={label}>
                 <p className="font-display text-5xl font-black mb-1">{n}</p>
                 <p className="font-body text-red-200 text-sm tracking-wide uppercase">{label}</p>
@@ -333,7 +360,7 @@ export default function Home() {
         <section className="py-28 px-6 bg-[#1a1208] text-white relative overflow-hidden">
           {/* Background accent image */}
           <div className="absolute inset-0 opacity-10">
-            <img src={SLIDESHOW_IMAGES[2]} alt="" className="w-full h-full object-cover" />
+            <img src={slideshowImages[2] ?? ''} alt="" className="w-full h-full object-cover" />
           </div>
           <div className="absolute inset-0" style={{ background:"linear-gradient(135deg, rgba(26,18,8,.97) 40%, rgba(120,20,20,.6) 100%)" }} />
 
