@@ -1,7 +1,9 @@
 import api  from "./axios";
 
-export const getComments = (song_id:string) =>{
-    return api.get(`/comments/allComments?song_id=${song_id}`)
+export const getComments = async (song_id:string) =>{
+     const res = await api.get(`/comments/allComments?song_id=${song_id}`)
+     console.log("Comments from db are: ",res, "Song id is: ", song_id)
+     return res
 }
 
 export const postComments = (song_id:string,comment:string) =>{

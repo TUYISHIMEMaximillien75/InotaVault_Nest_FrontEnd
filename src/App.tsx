@@ -19,6 +19,8 @@ import EditSong from "./pages/dashboard/EditSong";
 import RepertoireViewer from "./pages/RepertoireViewer";
 import NotFound from "./pages/NotFound";
 import Profile from "./Dashboard/Profile";
+import AdminDashboard from "./Dashboard/AdminDashboard";
+import AdminRoute from "./components/AdminRoute";
 
 export default function App() {
   return (
@@ -58,6 +60,7 @@ export default function App() {
           <Route path="/dashboard/edit_repertoire/:id" element={<EditRepertoire />}></Route>
           <Route path="/dashboard/edit_song/:id" element={<EditSong />}></Route>
           <Route path="/dashboard/profile" element={<Profile />}></Route>
+          <Route path="/dashboard/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>}></Route>
           <Route path="*" element={<NotFound />} />
         </Route>
           <Route path="*" element={<NotFound />} />
