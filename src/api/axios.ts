@@ -1,8 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  // baseURL: "https://backendinotavault-production.up.railway.app/"
-  baseURL: "https://backend-inotavault.vercel.app/",
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 api.interceptors.request.use((config) => {
